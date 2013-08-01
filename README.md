@@ -2,8 +2,9 @@
 
 An opinionated kickstarter for [AngularJS](http://angularjs.org) projects.
 
-This Project is forked from [Josh Millers ngBoilerplate](http://joshdmiller.github.com/ng-boilerplate)
-and was customized for [Neoksop GmbH](http://neoskop.de/).
+This Project is forked from [Neoksop GmbH](http://github.com/neoskop/ng-boilerplate)
+Which was forked from [Josh Millers ngBoilerplate](http://joshdmiller.github.com/ng-boilerplate)
+and was customized for [Kendrick Burson](http://github.com/kburson/ng-Boilerplate).
 ***
 
 ## Quick Start
@@ -16,13 +17,12 @@ Following global Tools are needed, if you do not have them already:
 $ npm install -g grunt-cli # Grunt Task Manager
 $ npm install -g karma     # Test Runner
 $ npm install -g bower     # Package Manager
-$ gem update --system && gem install compass # Compass Framework for SASS
 ```
 
 Clone the repository and install all dependencies:
 
 ```sh
-$ git clone git@github.com:neoskop/ng-boilerplate.git 
+$ git clone git@github.com:kburson/ng-boilerplate.git
 $ cd ng-boilerplate
 $ npm install
 $ bower install
@@ -182,7 +182,7 @@ from GitHub, or merge the branch into your existing repository. Assuming you're
 starting from scratch, simply clone this repository using git:
 
 ```sh
-$ git clone git://github.com/joshdmiller/ng-boilerplate my-project-name
+$ git clone git://github.com/kburson/ng-boilerplate    my-project-name
 $ cd my-project-name
 ```
 
