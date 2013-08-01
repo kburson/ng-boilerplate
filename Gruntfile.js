@@ -370,7 +370,7 @@ module.exports = function (grunt) {
         },
 
         /**
-         * connect-server instance, by default lisiting to port 9000
+         * connect-server instance, by default listening to port 9000
          */
         connect: {
             /**
@@ -379,6 +379,7 @@ module.exports = function (grunt) {
              */
             testserver: {
                 options: {
+                    port: 9009,
                     base: '<%= folders.build %>'
                 }
             },
@@ -402,7 +403,7 @@ module.exports = function (grunt) {
             options: {
                 configFile: '<%= folders.config %>/coffeelint.json'
             },
-            app: {
+            src: {
                 nonull: true,
                 expand: true,
                 files: [
@@ -564,24 +565,24 @@ module.exports = function (grunt) {
 
             unit: {
                 configFile: '<%= folders.build %>/karma.unit.conf.coffee',
-                port: 9001,
+                //port: 9001,
                 runnerPort: 9101
             },
 
             midway: {
                 configFile: '<%= folders.build %>/karma.midway.conf.coffee',
-                port: 9002,
+                //port: 9002,
                 runnerPort: 9102
             },
 
             e2e: {
                 configFile: '<%= folders.build %>/karma.e2e.conf.coffee',
-                browsers: ['Chrome'],
-                frameworks: ['ng-scenario'],
-                runnerport: '<%= connect.testserver.options.port %>', // where the app runs
                 port: 9003, // where karma runs
+                runnerport: '<%= connect.testserver.options.port %>', // where the app runs
                 urlRoot: '/_karma.e2e_/',
-                proxies:{ '/': 'http://localhost:<%= connect.testserver.options.port %>/'}
+                proxies:{ '/': 'http://localhost:<%= connect.testserver.options.port %>/'},
+                browsers: ['Chrome'],
+                frameworks: ['ng-scenario']
             },
 
             continuous_unit: {
@@ -603,12 +604,12 @@ module.exports = function (grunt) {
 
             continuous_e2e: {
                 configFile: '<%= folders.build %>/karma.e2e.conf.coffee',
-                frameworks: ['ng-scenario'],
-                browsers: ['Chrome'],
-                runnerPort: '<%= connect.testserver.options.port %>', // where the app runs
                 port: 9013, // where karma runs
+                runnerPort: '<%= connect.testserver.options.port %>', // where the app runs
                 urlRoot: '/_karma.e2e_/',
                 proxies:{ '/': 'http://localhost:<%= karma.continuous_e2e.runnerPort %>/'},
+                frameworks: ['ng-scenario'],
+                browsers: ['Chrome'],
                 singleRun: true,
                 background: false
             }
@@ -738,11 +739,7 @@ module.exports = function (grunt) {
              */
             jssrc: {
                 files: [
-                    '<%= files.app.js %>',
-                    '<%= files.test.unit.js %>',
-                    '<%= files.test.midway.js %>',
-                    '<%= files.test.e2e.js %>'
-
+                    '<%= files.app.js %>'
                 ],
                 tasks: ['jshint:src', 'karma:unit:run', 'karma:midway:run', 'karma:e2e:run', 'copy:build_appjs']
             },
@@ -896,9 +893,6 @@ module.exports = function (grunt) {
         //grunt.task.requires('build');
         grunt.task.run([
             'build',
-            'karma:unit',
-            'karma:midway',
-            'karma:e2e',
             'connect:livereload',
             'delta'
         ]);

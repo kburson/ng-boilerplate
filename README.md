@@ -35,6 +35,28 @@ $ grunt       # actually this builds the project
 $ grunt watch # starts a server (http://localhost:9000), will wait on changes and reloads the browser
 ```
 
+
+#### IMPORTANT FIX:
+
+until the coffeelint pull request is completed you will need to modify your
+local node_modules/grunt-coffeelint/tasks/coffeelint.js
+
+add the following to the top of the task definition:
+```javascript
+    var errorCount = 0;
+    var warnCount = 0;
+    var files = this.filesSrc;
+    var options = this.options();
+
+    if (options.configFile != undefined) {
+        var config = grunt.file.readJSON(options.configFile);
+        options.configFile = undefined;
+        for (var key in options) {
+            config[key] = options[key];
+        }
+        options = config;
+    }
+```
 ### Testing (Unit, E2E, Midway)
 
 All Test are located in the `test` folder and Test-Runner for this project is 
