@@ -2,7 +2,7 @@
 /* jslint camelcase: false */
 
 
-/**
+/** **
  * Setting livereload port, lrSnippet and a mount function for later
  * connect-livereload integration.
  */
@@ -17,10 +17,17 @@ var path = require('path');
 module.exports = function (grunt) {
 
     /**
+     * Load in our build configuration file.
+     */
+    var userConfig = require('./config/build.config.js');
+
+
+    /**
      * This is the configuration object Grunt uses to give each plugin its
      * instructions.
      */
     var taskConfig = {
+
         /**
          * We read in our `package.json` file so we can access the package name and
          * version. It's already there, so we don't repeat ourselves here.
@@ -374,8 +381,7 @@ module.exports = function (grunt) {
          */
         connect: {
             /**
-             * Testserver instance for e2e tests. This is a work in progress since
-             * we're still having problems with the e2e test environment.
+             * Testserver instance for e2e tests.
              */
             testserver: {
                 options: {
@@ -386,11 +392,11 @@ module.exports = function (grunt) {
 
             livereload: {
                 options: {
-                    port: 9000,
+                    port: 9200,
                     // change this to '0.0.0.0' to access the server from outside
                     hostname: '*',
                     middleware: function (connect) {
-                        return [lrSnippet, mountFolder(connect, '<%= folders.build %>')];
+                        return [lrSnippet, mountFolder(connect, userConfig.folders.build)];
                     }
                 }
             }
@@ -871,11 +877,6 @@ module.exports = function (grunt) {
      * in `package.json` when you do `npm install --save-dev` in this directory.
      */
     require('matchdep').filterDev('grunt-*').forEach(grunt.loadNpmTasks);
-
-    /**
-     * Load in our build configuration file.
-     */
-    var userConfig = require('./config/build.config.js');
 
     grunt.initConfig(grunt.util._.merge(taskConfig, userConfig));
 

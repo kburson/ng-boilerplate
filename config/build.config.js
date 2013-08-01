@@ -15,10 +15,10 @@ module.exports = {
      * put'em in their own directory `test`.
      */
     folders: {
-        config: 'config',
         build: '_build',
         compile: '_bin',
         release: '_dist',
+        config: 'config',
         docs: 'docs',
         vendor: 'vendor',
         assets: 'assets',
@@ -31,7 +31,7 @@ module.exports = {
         }
     },
 
-    /*
+    /* *
      * This is a collection of file patterns that refer to our app code (the
      * stuff in `src/`). These file paths are used in the configuration of
      * build tasks. `js` is all project javascript, less tests. `ctpl` contains

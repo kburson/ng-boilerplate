@@ -39,7 +39,7 @@ $ grunt watch # starts a server (http://localhost:9000), will wait on changes an
 #### IMPORTANT FIX:
 
 until the coffeelint pull request is completed you will need to modify your
-local node_modules/grunt-coffeelint/tasks/coffeelint.js
+local **node_modules/grunt-coffeelint/tasks/coffeelint.js**
 
 add the following to the top of the task definition:
 ```javascript
@@ -439,14 +439,14 @@ Naturally, I am open to all manner of ideas and suggestions. See the
 See the [issues list](http://github.com/kburson/ng-boilerplate/issues). And
 feel free to submit your own!
 
-* finish fixing e2e tests (currently cannot find browser)
-* get **karma-coffee-preprocessor** PR for sourceMap accepted.
+* use **grunt-express** instead of **grunt-contrib-connect**
+* use **express-livereload** instead of **connect-livereload**
+
 * convert to tests to **mocha** with **chai** instead of **jasmine**
+
 * can we target karma server in local project, or only in global install
 * can we access bower from local project (can we automate bower install from grunt)
 
-* use **grunt-express** instead of **grunt-contrib-connect**
-* use **express-livereload** instead of **connect-livereload**
 * use **sinon** for mocking
 * **grunt-usemin** instead of 'index' task in grunt file
 * **grunt-cdn2** to prep assets for cdn deployment
@@ -456,6 +456,10 @@ feel free to submit your own!
 * **contrib-imagemin**
 * **grunt-shell**
 * **grunt-env**
+
+#### pending todo:
+* get **karma-coffee-preprocessor** PR for sourceMap accepted.
+
 
 
 ### Contributing
