@@ -7,6 +7,7 @@ build process will exclude all `.spec.js` files from the build
 automatically.
 ###
 describe "ngBoilerplate.home", ->
+
     HomeCtrl = undefined
     scope = undefined
     beforeEach module("ngBoilerplate.home")

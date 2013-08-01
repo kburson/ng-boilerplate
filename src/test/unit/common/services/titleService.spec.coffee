@@ -1,4 +1,7 @@
 describe 'titleService', () ->
+
+    #expect = chai.expect
+
     $document = null
     titleService = null
 

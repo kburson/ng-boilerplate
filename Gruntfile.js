@@ -523,10 +523,10 @@ module.exports = function (grunt) {
 
                 hostname: 'localhost',
 
-                frameworks: ['jasmine'],
-                browsers: [ 'Chrome'],
+                frameworks: ['jasmine'],   // mocha, jasmine, ng-scenario
+                browsers: [ 'PhantomJS'], // Chrome, ChromeCanary, Firefox, Opera, Safari, PhantomJS
 
-                background: false,
+                background: true,
                 singleRun: false,
                 autoWatch: true,
 
@@ -542,13 +542,13 @@ module.exports = function (grunt) {
 
                 plugins: [
                     'karma-jasmine',
-                    //'karma-mocha',
+                    'karma-mocha',
                     'karma-ng-scenario',
                     'karma-chrome-launcher',
                     'karma-firefox-launcher',
                     'karma-safari-launcher',
                     'karma-phantomjs-launcher',
-                    //'karma-script-launcher',
+                    'karma-script-launcher',
                     'karma-coffee-preprocessor',
                     'karma-html2js-preprocessor',
                     'karma-requirejs'
@@ -561,63 +561,59 @@ module.exports = function (grunt) {
                     }
                 }
             },
+
             unit: {
-                options: {
-                    configFile: '<%= folders.build %>/karma.unit.conf.coffee'
-                },
+                configFile: '<%= folders.build %>/karma.unit.conf.coffee',
                 port: 9001,
                 runnerPort: 9101
             },
 
             midway: {
-                options: {
-                    configFile: '<%= folders.build %>/karma.midway.conf.coffee'
-                },
+                configFile: '<%= folders.build %>/karma.midway.conf.coffee',
                 port: 9002,
                 runnerPort: 9102
             },
 
             e2e: {
-                options: {
-                    configFile: '<%= folders.build %>/karma.e2e.conf.coffee'
-                },
+                configFile: '<%= folders.build %>/karma.e2e.conf.coffee',
+                browsers: ['Chrome'],
                 frameworks: ['ng-scenario'],
                 runnerport: '<%= connect.testserver.options.port %>', // where the app runs
                 port: 9003, // where karma runs
                 urlRoot: '/_karma.e2e_/',
                 proxies:{ '/': 'http://localhost:<%= karma.e2e.runnerPort %>/'}
             },
-            once_unit: {
-                options: {
-                    configFile: '<%= folders.build %>/karma.unit.conf.coffee'
-                },
+
+            continuous_unit: {
+                configFile: '<%= folders.build %>/karma.unit.conf.coffee',
                 port: 9011,
                 runnerPort: 9111,
                 singleRun: true,
-                autoWatch: false
+                autoWatch: false,
+                background: false
             },
 
-            once_midway: {
-                options: {
-                    configFile: '<%= folders.build %>/karma.midway.conf.coffee'
-                },
+            continuous_midway: {
+                configFile: '<%= folders.build %>/karma.midway.conf.coffee',
                 port: 9012,
                 runnerPort: 9112,
                 singleRun: true,
-                autoWatch: false
+                autoWatch: false,
+                background: false
+
             },
 
-            once_e2e: {
-                options: {
-                    configFile: '<%= folders.build %>/karma.e2e.conf.coffee',
-                    frameworks: ['ng-scenario']
-                },
+            continuous_e2e: {
+                configFile: '<%= folders.build %>/karma.e2e.conf.coffee',
+                frameworks: ['ng-scenario'],
+                browsers: ['Chrome'],
                 runnerPort: '<%= connect.testserver.options.port %>', // where the app runs
                 port: 9013, // where karma runs
                 urlRoot: '/_karma.e2e_/',
-                proxies:{ '/': 'http://localhost:<%= karma.once_e2e.runnerPort %>/'},
+                proxies:{ '/': 'http://localhost:<%= karma.continuous_e2e.runnerPort %>/'},
                 singleRun: true,
-                autoWatch: false
+                autoWatch: false,
+                background: false
             }
         },
 
@@ -634,6 +630,8 @@ module.exports = function (grunt) {
                 src: [
                     '<%= files.vendor.js %>',
                     'vendor/angular-mocks/index.js',
+                    //'node_modules/chai/chai.js',
+                    //'<%= folders.config %>/chai.coffee',
 
                     '<%= html2js.app.dest %>',
                     '<%= html2js.common.dest %>',
@@ -643,6 +641,9 @@ module.exports = function (grunt) {
 
                     '<%= files.app.coffee %>',
                     '<%= files.test.unit.coffee %>'
+
+                    // { pattern: 'app/**/*.coffee', watched: true}  // try this format
+
                 ]
             },
 
@@ -652,6 +653,8 @@ module.exports = function (grunt) {
                 src: [
                     '<%= files.vendor.js %>',
                     'vendor/ngMidwayTester/Source/ngMidwayTester.js',
+                    //'node_modules/chai/chai.js',
+                    //'<%= folders.config %>/chai.coffee',
 
                     '<%= html2js.app.dest %>',
                     '<%= html2js.common.dest %>',
@@ -661,6 +664,8 @@ module.exports = function (grunt) {
 
                     '<%= files.app.coffee %>',
                     '<%= files.test.midway.coffee %>'
+
+                    // { pattern: 'app/**/*.coffee', watched: true}  // try this format
                 ]
             },
 
@@ -678,6 +683,9 @@ module.exports = function (grunt) {
 
                     '<%= files.app.coffee %>',
                     '<%= files.test.e2e.coffee %>'
+
+                    // { pattern: 'app/**/*.coffee', watched: true}  // try this format
+
                 ]
             }
         },
@@ -939,10 +947,10 @@ module.exports = function (grunt) {
             'copy:build_vendorcss', // ??
             'index:build',
             'karmaconfig',
-            'karma:once_unit',
-            'karma:once_midway',
+            'karma:continuous_unit',
+            'karma:continuous_midway',
             'connect:testserver',
-            'karma:once_e2e'
+            'karma:continuous_e2e'
         ]);
     });
 

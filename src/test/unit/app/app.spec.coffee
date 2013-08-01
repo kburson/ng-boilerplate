@@ -1,5 +1,8 @@
 "use strict"
 describe "ngBoilerplate", ->
+
+    #expect = chai.expect
+
     AppCtrl = undefined
     scope = undefined
     location = undefined
