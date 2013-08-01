@@ -581,9 +581,11 @@ module.exports = function (grunt) {
                 options: {
                     configFile: '<%= folders.build %>/karma.e2e.conf.coffee'
                 },
-                frameworks: ['jasmine', 'ng-scenario'],
-                port: 9003,
-                runnerPort: 9103
+                frameworks: ['ng-scenario'],
+                runnerport: '<%= connect.testserver.options.port %>', // where the app runs
+                port: 9003, // where karma runs
+                urlRoot: '/_karma.e2e_/',
+                proxies:{ '/': 'http://localhost:<%= karma.e2e.runnerPort %>/'}
             },
             once_unit: {
                 options: {
@@ -608,10 +610,12 @@ module.exports = function (grunt) {
             once_e2e: {
                 options: {
                     configFile: '<%= folders.build %>/karma.e2e.conf.coffee',
-                    frameworks: ['jasmine', 'ng-scenario']
+                    frameworks: ['ng-scenario']
                 },
-                port: 9013,
-                runnerPort: 9113,
+                runnerPort: '<%= connect.testserver.options.port %>', // where the app runs
+                port: 9013, // where karma runs
+                urlRoot: '/_karma.e2e_/',
+                proxies:{ '/': 'http://localhost:<%= karma.once_e2e.runnerPort %>/'},
                 singleRun: true,
                 autoWatch: false
             }
