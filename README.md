@@ -100,24 +100,43 @@ At a high level, the structure looks roughly like this:
 ### Structure
 ```
 ng-boilerplate/
+  |
+  +- assets/
+  |  +- img/
+  |  +- faviocon.ico
+  +- config/
+  |  +- build.config.js
+  |  +- coffeelint.json
+  |  +- jshint.json
+  |  +- karma.config.tpl.coffee
+  |  +- changelog.tpl
+  |  +- module.prefix
+  |  +- module.suffix
+  |  +- <build config and template files>
+  +- docs/
+  |  +- <generated docs for this project>
   |- src/
   |  |- app/
-  |  |  |- <app logic>
-  |  |- assets/
-  |  |  |- <static files>
-  |  |- components/
-  |  |  |- <reusable code & external libs>
-  |  |- sass/
-  |  |  |- <sass as preprocessor for css>
-  |- vendor/
-  |  |- <bower components>
-  |- test/
-  |  | - <test written in jasmine>
-  |- build.config.js
-  |- Gruntfile.js
-  |- module.prefix
-  |- module.suffix
-  |- package.json
+  |  |  +- <app logic >
+  |  |- common/
+  |  |  +- <reusable code>
+  |  +- less/
+  |  |  +- <stylesheets as less preprocessor>
+  |  +- test/
+  |  |  +- <tests written in jasmine/mocha, not part of a specific feature>
+  |  +- index.html
+  +- vendor/
+  |  +- <bower components>
+  +- .bowerrc
+  +- .editorconfig
+  +- .gitignore
+  +- .gitmodules
+  +- .travis.yml;
+  +- Gruntfile.js
+  +- package.json
+  +- bower.json
+  +- LICENSE
+  +- README.md
 ```
 What follows is a brief description of each entry, but most directories contain
 their own `README.md` file with additional documentation, so browse around to
@@ -395,8 +414,27 @@ Naturally, I am open to all manner of ideas and suggestions. See the
 
 ### To Do
 
-See the [issues list](http://github.com/joshdmiller/ng-boilerplate/issues). And
+See the [issues list](http://github.com/kburson/ng-boilerplate/issues). And
 feel free to submit your own!
+
+* finish fixing e2e tests (currently cannot find browser)
+* get **karma-coffee-preprocessor** PR for sourceMap accepted.
+* convert to tests to **mocha** with **chai** instead of **jasmine**
+* can we target karma server in local project, or only in global install
+* can we access bower from local project (can we automate bower install from grunt)
+
+* use **grunt-express** instead of **grunt-contrib-connect**
+* use **express-livereload** instead of **connect-livereload**
+* use **sinon** for mocking
+* **grunt-usemin** instead of 'index' task in grunt file
+* **grunt-cdn2** to prep assets for cdn deployment
+* **grunt-rev** for cache-busting
+* **grunt-contrib-jade** for index.html templating (similar to maven filters)
+* **grunt-concurrent** to speed up multiple targets
+* **contrib-imagemin**
+* **grunt-shell**
+* **grunt-env**
+
 
 ### Contributing
 
