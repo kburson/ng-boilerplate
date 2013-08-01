@@ -28,11 +28,11 @@ And of course we define a controller for our route.
 ###
 angular.module("ngBoilerplate.home", ["templates-app", "templates-common", "ui.state", "titleService"]).config(config = ($stateProvider) ->
     $stateProvider.state "home",
-    url: "/home"
-views:
-    main:
-        controller: "HomeCtrl"
-templateUrl: "home/home.tpl.html"
+        url: "/home"
+        views:
+            main:
+                controller: "HomeCtrl"
+                templateUrl: "home/home.tpl.html"
 
 ).controller "HomeCtrl", ($scope, titleService) ->
     titleService.setTitle "Home"

@@ -528,7 +528,7 @@ module.exports = function (grunt) {
 
                 background: true,
                 singleRun: false,
-                autoWatch: true,
+                autoWatch: false,
 
                 colors: true,
                 loggers: [
@@ -581,7 +581,7 @@ module.exports = function (grunt) {
                 runnerport: '<%= connect.testserver.options.port %>', // where the app runs
                 port: 9003, // where karma runs
                 urlRoot: '/_karma.e2e_/',
-                proxies:{ '/': 'http://localhost:<%= karma.e2e.runnerPort %>/'}
+                proxies:{ '/': 'http://localhost:<%= connect.testserver.options.port %>/'}
             },
 
             continuous_unit: {
@@ -589,7 +589,6 @@ module.exports = function (grunt) {
                 port: 9011,
                 runnerPort: 9111,
                 singleRun: true,
-                autoWatch: false,
                 background: false
             },
 
@@ -598,7 +597,6 @@ module.exports = function (grunt) {
                 port: 9012,
                 runnerPort: 9112,
                 singleRun: true,
-                autoWatch: false,
                 background: false
 
             },
@@ -612,7 +610,6 @@ module.exports = function (grunt) {
                 urlRoot: '/_karma.e2e_/',
                 proxies:{ '/': 'http://localhost:<%= karma.continuous_e2e.runnerPort %>/'},
                 singleRun: true,
-                autoWatch: false,
                 background: false
             }
         },
@@ -728,19 +725,8 @@ module.exports = function (grunt) {
              * When the build.conf.js changes, we just want to lint it. In fact, when
              */
             buildconf: {
-                files: './build.config.js',
+                files: '<%= folders.config %>/build.config.js',
                 tasks: ['jshint:buildconf'],
-                options: {
-                    livereload: false
-                }
-            },
-
-            /**
-             * When the build.task.conf changes, we just want to lint it. In fact, when
-             */
-            buildtasks: {
-                files: 'build.tasks.js',
-                tasks: ['jshint:buildtasks'],
                 options: {
                     livereload: false
                 }
@@ -752,7 +738,11 @@ module.exports = function (grunt) {
              */
             jssrc: {
                 files: [
-                    '<%= files.app.js %>'
+                    '<%= files.app.js %>',
+                    '<%= files.test.unit.js %>',
+                    '<%= files.test.midway.js %>',
+                    '<%= files.test.e2e.js %>'
+
                 ],
                 tasks: ['jshint:src', 'karma:unit:run', 'karma:midway:run', 'karma:e2e:run', 'copy:build_appjs']
             },
@@ -763,7 +753,10 @@ module.exports = function (grunt) {
              */
             coffeesrc: {
                 files: [
-                    '<%= files.app.coffee %>'
+                    '<%= files.app.coffee %>',
+                    '<%= files.test.unit.coffee %>',
+                    '<%= files.test.midway.coffee %>',
+                    '<%= files.test.e2e.coffee %>'
                 ],
                 tasks: [ 'coffeelint:src', 'coffee:source', 'karma:unit:run', 'karma:midway:run', 'karma:e2e:run', 'copy:build_appjs' ]
             },
