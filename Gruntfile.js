@@ -537,7 +537,6 @@ module.exports = function (grunt) {
          * rootUrl:  and what is the URL path for the browser to use.
          */
 
-
         karma: {
             options: {
                 basePath: '../', // project root relative to karma.config file, prepend to all file paths
@@ -545,7 +544,7 @@ module.exports = function (grunt) {
 
                 hostname: 'localhost',
 
-                frameworks: ['jasmine'], //['mocha','chai'],   // mocha, jasmine, ng-scenario
+                frameworks: ['jasmine'],   // mocha, jasmine, ng-scenario
                 browsers: [ 'PhantomJS'], // Chrome, ChromeCanary, Firefox, Opera, Safari, PhantomJS
 
                 background: true,
@@ -586,7 +585,9 @@ module.exports = function (grunt) {
             },
 
             unit: {
+                frameworks: ['jasmine','mocha','chai'],
                 configFile: '<%= folders.build %>/karma.unit.conf.coffee',
+                browsers: [ 'Chrome'],
                 //port: 9001,
                 runnerPort: 9101
             },
@@ -608,6 +609,7 @@ module.exports = function (grunt) {
             },
 
             continuous_unit: {
+                frameworks: ['mocha','chai'],
                 configFile: '<%= folders.build %>/karma.unit.conf.coffee',
                 port: 9011,
                 runnerPort: 9111,

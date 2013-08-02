@@ -1,6 +1,7 @@
-describe 'titleService', () ->
 
-    #expect = chai.expect
+expect = chai.expect
+
+describe 'titleService', () ->
 
     $document = null
     titleService = null
@@ -16,14 +17,14 @@ describe 'titleService', () ->
         title = "new title"
         titleService.setTitle title
 
-        expect(titleService.getTitle()).toEqual(title)
+        expect(titleService.getTitle()).to.equal(title)
     )
 
     it 'should allow specification of a suffix', inject(() ->
         suffix = " :: new suffix"
         titleService.setSuffix suffix
 
-        expect(titleService.getSuffix()).toEqual(suffix)
+        expect(titleService.getSuffix()).to.equal(suffix)
     )
 
     it 'should set the title, including the suffix', inject(() ->
@@ -32,6 +33,6 @@ describe 'titleService', () ->
 
         titleService.setSuffix suffix
         titleService.setTitle title
-        expect(titleService.getTitle()).toEqual(title + suffix)
+        expect(titleService.getTitle()).to.equal(title + suffix)
     )
 

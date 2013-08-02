@@ -1,7 +1,9 @@
 "use strict"
+
+expect = chai.expect
+
 describe "ngBoilerplate", ->
 
-    #expect = chai.expect
 
     AppCtrl = undefined
     scope = undefined
@@ -23,9 +25,9 @@ describe "ngBoilerplate", ->
             )
         )
         it "should have an AppCtrl", ->
-            expect(AppCtrl).toBeDefined()
+            expect(AppCtrl).to.not.be.undefined
 
         it "should attach a list of features to scope", ->
-            expect(scope.features.length).toBe 5
+            expect(scope.features.length).to.equal 5
 
 

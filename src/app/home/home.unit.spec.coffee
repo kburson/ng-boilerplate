@@ -1,5 +1,7 @@
 "use strict"
 
+expect = chai.expect
+
 ###
 Tests sit right alongside the file they are testing, which is more intuitive
 and portable than separating `src` and `test` directories. Additionally, the
@@ -17,5 +19,5 @@ describe "ngBoilerplate.home", ->
         )
     )
     it "should have a HomeCtrl", ->
-        expect(HomeCtrl).toBeDefined()
+        expect(HomeCtrl).to.not.be.undefined
 

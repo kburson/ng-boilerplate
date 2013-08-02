@@ -23,5 +23,5 @@ describe "ngBoilerplate.home", ->
     )
 
     it "should have a HomeCtrl", ->
-        expect(HomeCtrl).toBeDefined()
+        expect(HomeCtrl).to.not.equal.undefined
 

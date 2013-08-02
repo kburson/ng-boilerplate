@@ -1,4 +1,4 @@
-'use strict';
+//'use strict';
 
 describe('titleService', function () {
 
@@ -9,14 +9,14 @@ describe('titleService', function () {
         var title = 'new title';
         titleService.setTitle(title);
 
-        expect(titleService.getTitle()).toEqual(title);
+        expect(titleService.getTitle()).to.equal(title);
     }));
 
     it('should allow specification a suffix', inject(function (titleService) {
         var suffix = ' :: new suffix';
         titleService.setSuffix(suffix);
 
-        expect(titleService.getSuffix()).toEqual(suffix);
+        expect(titleService.getSuffix()).to.equal(suffix);
     }));
 
     it('should set the title, including the suffix', inject(function (titleService) {
@@ -25,7 +25,7 @@ describe('titleService', function () {
 
         titleService.setSuffix(suffix);
         titleService.setTitle(title);
-        expect(titleService.getTitle()).toEqual(title + suffix);
+        expect(titleService.getTitle()).to.equal(title + suffix);
     }));
 });
 

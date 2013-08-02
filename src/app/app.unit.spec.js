@@ -1,4 +1,6 @@
-'use strict';
+//'use strict';
+
+expect = chai.expect;
 
 describe('ngBoilerplate', function () {
 
@@ -29,7 +31,7 @@ describe('ngBoilerplate', function () {
         });
 
         it('should attach a list of features to scope', function () {
-            expect(scope.features.length).toBe(5);
+            expect(scope.features.length).toEqual(5);
         });
 
     });
