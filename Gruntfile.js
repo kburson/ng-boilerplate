@@ -687,6 +687,7 @@ module.exports = function (grunt) {
                 src: [
                     '<%= files.vendor.js %>',
                     'vendor/ngMidwayTester/Source/ngMidwayTester.js',
+                    'node_modules/sinon/pkg/sinon.js',
 
                     '<%= html2js.app.dest %>',
                     '<%= html2js.common.dest %>',

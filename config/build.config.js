@@ -16,12 +16,11 @@ module.exports = {
      */
     folders: {
         build: '_build',
-        compile: '_bin',
-        release: '_dist',
+        compile: '_dist',
         config: 'config',
         docs: 'docs',
         vendor: 'vendor',
-        assets: 'assets',
+        assets: '<%= folders.src %>/assets',
         src: 'src',
         test: {
             test: '<%= folders.src %>/test',
