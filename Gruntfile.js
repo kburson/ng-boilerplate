@@ -2,6 +2,7 @@
 /* jslint camelcase: false */
 
 
+// TODO:  DELETE THIS
 /** **
  * Setting livereload port, lrSnippet and a mount function for later
  * connect-livereload integration.
@@ -11,6 +12,8 @@ var lrSnippet = require('connect-livereload')({port: LIVERELOAD_PORT});
 var mountFolder = function (connect, dir) {
     return connect.static(require('path').resolve(dir));
 };
+// TODO:  DELETE THIS
+
 
 var path = require('path');
 
@@ -79,6 +82,20 @@ module.exports = function (grunt) {
                 tagMessage: 'Version %VERSION%',
                 push: false,
                 pushTo: 'origin'
+            }
+        },
+
+        shell: {
+            options: { stdout: true },
+            bower_install: {
+                command: [
+                    'echo "** install bower components"',
+                    'node_modules/bower/bin/bower install --verbose',
+                    'node_modules/bower/bin/bower prune --verbose'
+                ].join('&&')
+            },
+            bower_update: {
+                command: 'node_modules/bower/bin/bower update --verbose'
             }
         },
 
@@ -379,6 +396,7 @@ module.exports = function (grunt) {
         /**
          * connect-server instance, by default listening to port 9000
          */
+        // TODO: Change to express
         connect: {
             /**
              * Testserver instance for e2e tests.
@@ -395,6 +413,9 @@ module.exports = function (grunt) {
                     port: 9200,
                     // change this to '0.0.0.0' to access the server from outside
                     hostname: '*',
+                    // livereload: true,
+                    // bases: [ userConfig.folders.build ],
+                    // TODO: delete this ---
                     middleware: function (connect) {
                         return [lrSnippet, mountFolder(connect, userConfig.folders.build)];
                     }
@@ -729,6 +750,16 @@ module.exports = function (grunt) {
             },
 
             /**
+             * When the bower.json changes, we want to lint it and execute bower_install
+             * to get any new dependencies
+             */
+            bowerfile: {
+                files: 'bower.json',
+                tasks: ['shell:bower_install'],
+                options: { livereload: false }
+            },
+
+            /**
              * When the build.conf.js changes, we just want to lint it. In fact, when
              */
             buildconf: {
@@ -914,7 +945,13 @@ module.exports = function (grunt) {
      */
     grunt.registerTask('default', function () {
         //grunt.task.requires('build');
-        grunt.task.run(['build', 'compile']);
+        grunt.task.run(['init', 'build', 'compile']);
+    });
+
+    grunt.registerTask('init', 'install bower components if not already installed', function() {
+        if(!grunt.file.isDir(grunt.config('folders.vendor'))) {
+            grunt.task.run('shell:bower_install');
+        }
     });
 
     /**
