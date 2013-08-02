@@ -1,4 +1,8 @@
-"use strict"
+
+should = chai.should()
+expect = chai.expect
+assert = chai.assert
+
 describe "titleService", ->
     module = undefined
     deps = undefined
@@ -10,5 +14,5 @@ describe "titleService", ->
         deps = module.value("titleService").requires
 
     it "should be registered", ->
-        expect(module).not.toEqual null
+        expect(module).is.not.null
 

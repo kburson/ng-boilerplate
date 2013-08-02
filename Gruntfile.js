@@ -585,7 +585,8 @@ module.exports = function (grunt) {
             },
 
             unit: {
-                frameworks: ['jasmine','mocha','chai'],
+                //frameworks: ['jasmine'],
+                frameworks: ['mocha','chai'], // mocha only for coffee tests
                 configFile: '<%= folders.build %>/karma.unit.conf.coffee',
                 browsers: [ 'Chrome'],
                 //port: 9001,
@@ -593,6 +594,8 @@ module.exports = function (grunt) {
             },
 
             midway: {
+                //frameworks: ['jasmine'],
+                frameworks: ['mocha','chai'], // mocha only for coffee tests
                 configFile: '<%= folders.build %>/karma.midway.conf.coffee',
                 //port: 9002,
                 runnerPort: 9102
@@ -609,7 +612,8 @@ module.exports = function (grunt) {
             },
 
             continuous_unit: {
-                frameworks: ['mocha','chai'],
+                //frameworks: ['jasmine'],
+                frameworks: ['mocha','chai'], // mocha only for coffee tests
                 configFile: '<%= folders.build %>/karma.unit.conf.coffee',
                 port: 9011,
                 runnerPort: 9111,
@@ -618,6 +622,8 @@ module.exports = function (grunt) {
             },
 
             continuous_midway: {
+                //frameworks: ['jasmine'],
+                frameworks: ['mocha','chai'], // mocha only for coffee tests
                 configFile: '<%= folders.build %>/karma.midway.conf.coffee',
                 port: 9012,
                 runnerPort: 9112,

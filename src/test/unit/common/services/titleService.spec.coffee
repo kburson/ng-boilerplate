@@ -1,5 +1,8 @@
+'use strict'
 
+should = chai.should()
 expect = chai.expect
+assert = chai.assert
 
 describe 'titleService', () ->
 
