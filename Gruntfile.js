@@ -1,20 +1,6 @@
 'use strict';
 /* jslint camelcase: false */
 
-
-// TODO:  DELETE THIS
-/** **
- * Setting livereload port, lrSnippet and a mount function for later
- * connect-livereload integration.
- */
-var LIVERELOAD_PORT = 35729;
-var lrSnippet = require('connect-livereload')({port: LIVERELOAD_PORT});
-var mountFolder = function (connect, dir) {
-    return connect.static(require('path').resolve(dir));
-};
-// TODO:  DELETE THIS
-
-
 var path = require('path');
 
 module.exports = function (grunt) {
@@ -394,17 +380,17 @@ module.exports = function (grunt) {
         },
 
         /**
-         * connect-server instance, by default listening to port 9000
+         * express-server instance, by default listening to port 9000
          */
-        // TODO: Change to express
-        connect: {
+        express: {
             /**
              * Testserver instance for e2e tests.
              */
             testserver: {
                 options: {
                     port: 9009,
-                    base: '<%= folders.build %>'
+                    hostname: 'localhost',
+                    bases: ['<%= folders.build %>']
                 }
             },
 
@@ -413,12 +399,8 @@ module.exports = function (grunt) {
                     port: 9200,
                     // change this to '0.0.0.0' to access the server from outside
                     hostname: '*',
-                    // livereload: true,
-                    // bases: [ userConfig.folders.build ],
-                    // TODO: delete this ---
-                    middleware: function (connect) {
-                        return [lrSnippet, mountFolder(connect, userConfig.folders.build)];
-                    }
+                    livereload: true,
+                    bases: [ userConfig.folders.build ]
                 }
             }
         },
@@ -605,9 +587,9 @@ module.exports = function (grunt) {
             e2e: {
                 configFile: '<%= folders.build %>/karma.e2e.conf.coffee',
                 port: 9003, // where karma runs
-                runnerport: '<%= connect.testserver.options.port %>', // where the app runs
+                runnerport: '<%= express.testserver.options.port %>', // where the app runs
                 urlRoot: '/_karma.e2e_/',
-                proxies:{ '/': 'http://localhost:<%= connect.testserver.options.port %>/'},
+                proxies:{ '/': 'http://localhost:<%= express.testserver.options.port %>/'},
                 browsers: ['Chrome'],
                 frameworks: ['ng-scenario']
             },
@@ -632,7 +614,7 @@ module.exports = function (grunt) {
             continuous_e2e: {
                 configFile: '<%= folders.build %>/karma.e2e.conf.coffee',
                 port: 9013, // where karma runs
-                runnerPort: '<%= connect.testserver.options.port %>', // where the app runs
+                runnerPort: '<%= express.testserver.options.port %>', // where the app runs
                 urlRoot: '/_karma.e2e_/',
                 proxies:{ '/': 'http://localhost:<%= karma.continuous_e2e.runnerPort %>/'},
                 frameworks: ['ng-scenario'],
@@ -925,7 +907,7 @@ module.exports = function (grunt) {
         //grunt.task.requires('build');
         grunt.task.run([
             'build',
-            'connect:livereload',
+            'express:livereload',
             'delta'
         ]);
     });
@@ -974,7 +956,7 @@ module.exports = function (grunt) {
             'karmaconfig',
             'karma:continuous_unit',
             'karma:continuous_midway',
-            'connect:testserver',
+            'express:testserver',
             'karma:continuous_e2e'
         ]);
     });
