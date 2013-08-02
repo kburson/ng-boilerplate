@@ -54,7 +54,7 @@ module.exports = function (grunt) {
                 options: {
                     install: true,
                     cleanTargetDir: true,
-                    //cleanBowerDir: true,
+                    cleanBowerDir: true,
                     layout: 'byComponent',
                     targetDir: 'vendor',
                     verbose: true
@@ -545,7 +545,7 @@ module.exports = function (grunt) {
 
                 hostname: 'localhost',
 
-                frameworks: ['jasmine'],   // mocha, jasmine, ng-scenario
+                frameworks: ['jasmine'], //['mocha','chai'],   // mocha, jasmine, ng-scenario
                 browsers: [ 'PhantomJS'], // Chrome, ChromeCanary, Firefox, Opera, Safari, PhantomJS
 
                 background: true,
@@ -565,6 +565,7 @@ module.exports = function (grunt) {
                 plugins: [
                     'karma-jasmine',
                     'karma-mocha',
+                    'karma-chai',
                     'karma-ng-scenario',
                     'karma-chrome-launcher',
                     'karma-firefox-launcher',
@@ -648,12 +649,19 @@ module.exports = function (grunt) {
                 dest: '<%= folders.build %>/karma.unit.conf.coffee',
                 src: [
                     '<%= files.vendor.js %>',
+
+                    'node_modules/sinon/pkg/sinon.js',
                     'vendor/angular-mocks/index.js',
-                    //'node_modules/chai/chai.js',
-                    //'<%= folders.config %>/chai.coffee',
 
                     '<%= html2js.app.dest %>',
                     '<%= html2js.common.dest %>',
+                    /*
+                    '{ pattern: <%= files.app.js %>, watched: true }',
+                    '{ pattern: <%= files.test.unit.js %>, watched: true }',
+
+                    '{ pattern: <%= files.app.coffee %>, watched: true }',
+                    '{ pattern: <%= files.test.unit.coffee %>, watched: true }'
+                    */
 
                     '<%= files.app.js %>',
                     '<%= files.test.unit.js %>',
@@ -662,7 +670,6 @@ module.exports = function (grunt) {
                     '<%= files.test.unit.coffee %>'
 
                     // { pattern: 'app/**/*.coffee', watched: true}  // try this format
-
                 ]
             },
 
@@ -672,8 +679,6 @@ module.exports = function (grunt) {
                 src: [
                     '<%= files.vendor.js %>',
                     'vendor/ngMidwayTester/Source/ngMidwayTester.js',
-                    //'node_modules/chai/chai.js',
-                    //'<%= folders.config %>/chai.coffee',
 
                     '<%= html2js.app.dest %>',
                     '<%= html2js.common.dest %>',
@@ -925,15 +930,6 @@ module.exports = function (grunt) {
     });
 
 
-    grunt.registerTask('print', function (grunt) {
-        //console.log("this.data.*:", this.data);
-        //console.log("print config:\n",userConfig,"\n\n");
-        //console.log('print grunt: ', grunt);
-        console.log('print config.folders:\n', grunt.config('folders'), '\n\n');
-        console.log('print config.files:\n', grunt.config('files'), '\n\n');
-    });
-
-
     /**
      * The default task is to build and compile.
      */
@@ -1022,6 +1018,15 @@ module.exports = function (grunt) {
     }
 
     /**
+     * A utility function to get all app JavaScript sources.
+     */
+    function filterForCoffee(srcFiles) {
+        return srcFiles.filter(function (file) {
+            return file.match(/\.coffee$/);
+        });
+    }
+
+    /**
      * A utility function to get all app CSS sources.
      */
     function filterForCSS(srcFiles) {
@@ -1049,6 +1054,11 @@ module.exports = function (grunt) {
             return file.replace(dirRegEx, '');
         });
 
+        var coffeeFiles = filterForCoffee(this.filesSrc).map(function (file) {
+            return file.replace(dirRegEx, '');
+        });
+        console.log('coffee files for index?: \n', coffeeFiles);
+
         grunt.file.copy(grunt.config('folders.src') + '/index.html', this.data.dest + '/index.html', {
             process: function (contents) {
                 return grunt.template.process(contents, {
@@ -1069,19 +1079,31 @@ module.exports = function (grunt) {
      * The `karma/*` files are compiled as grunt templates for use by Karma. Yay!
      */
     grunt.registerMultiTask('karmaconfig', 'Process karma config templates', function () {
-        var jsFiles = this.filesSrc;
+        var files = this.filesSrc;
+        //console.log("\n-------------\nthis:\n", this,"\n--------------\n")
+        //console.log("\n-------------\nfiles:\n", files,"\n--------------\n")
+        //console.log("\n-------------\nfiles.src:\n", this.files[0].src,"\n--------------\n")
 
         grunt.file.copy(this.data.template, this.data.dest, {
             process: function (contents) {
+                //console.log("\n-------------\ncontents:\n", contents,"\n--------------\n")
                 return grunt.template.process(contents, {
                     data: {
-                        scripts: jsFiles
+                        scripts: files
                     }
                 });
             }
         });
     });
 
+
+    grunt.registerTask('print', function (grunt) {
+        //console.log("this.data.*:", this.data);
+        //console.log("print config:\n",userConfig,"\n\n");
+        //console.log('print grunt: ', grunt);
+        console.log('print config.folders:\n', grunt.config('folders'), '\n\n');
+        console.log('print config.files:\n', grunt.config('files'), '\n\n');
+    });
 
     grunt.registerTask('displayFiles', 'Display config files', function () {
         var files = grunt.file.expand(grunt.config('files.app.coffee'));

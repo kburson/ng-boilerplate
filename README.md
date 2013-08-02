@@ -439,26 +439,22 @@ Naturally, I am open to all manner of ideas and suggestions. See the
 See the [issues list](http://github.com/kburson/ng-boilerplate/issues). And
 feel free to submit your own!
 
-* use **grunt-express** instead of **grunt-contrib-connect**
-* use **express-livereload** instead of **connect-livereload**
-
 * convert to tests to **mocha** with **chai** instead of **jasmine**
 
-* can we target karma server in local project, or only in global install
-* can we access bower from local project (can we automate bower install from grunt)
-
 * use **sinon** for mocking
+* **contrib-imagemin**
 * **grunt-usemin** instead of 'index' task in grunt file
 * **grunt-cdn2** to prep assets for cdn deployment
 * **grunt-rev** for cache-busting
 * **grunt-contrib-jade** for index.html templating (similar to maven filters)
 * **grunt-concurrent** to speed up multiple targets
-* **contrib-imagemin**
-* **grunt-shell**
-* **grunt-env**
 
 #### pending todo:
 * get **karma-coffee-preprocessor** PR for sourceMap accepted.
+
+* can we target karma server in local project, or only in global install
+* can we access bower from local project (can we automate bower install from grunt)
+
 
 
 

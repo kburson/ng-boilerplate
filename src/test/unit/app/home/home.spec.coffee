@@ -8,15 +8,20 @@ automatically.
 ###
 describe "ngBoilerplate.home", ->
 
+    #expect = chai.expect
+
     HomeCtrl = undefined
     scope = undefined
+
     beforeEach module("ngBoilerplate.home")
+
     beforeEach inject(($rootScope, $controller) ->
         scope = $rootScope.$new()
         HomeCtrl = $controller("HomeCtrl",
             $scope: scope
         )
     )
+
     it "should have a HomeCtrl", ->
         expect(HomeCtrl).toBeDefined()
 
