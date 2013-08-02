@@ -48,6 +48,31 @@ module.exports = function (grunt) {
             }
         },
 
+        bower: {
+            install: {
+                //just run 'grunt bower:install' and you'll see files from your Bower packages in lib directory
+                options: {
+                    install: true,
+                    cleanTargetDir: true,
+                    //cleanBowerDir: true,
+                    layout: 'byComponent',
+                    targetDir: 'vendor',
+                    verbose: true
+                }
+            }
+        },
+
+        shell: {
+            options: {
+                //failOnError:true,
+                stderr: true,
+                stdout: true
+            },
+            bower_prune: {
+                command: 'node_modules/bower/bin/bower prune --verbose'
+            }
+        },
+
         /**
          * Increments the version number, etc.
          */
@@ -71,19 +96,6 @@ module.exports = function (grunt) {
             }
         },
 
-        shell: {
-            options: { stdout: true },
-            bower_install: {
-                command: [
-                    'echo "** install bower components"',
-                    'node_modules/bower/bin/bower install --verbose',
-                    'node_modules/bower/bin/bower prune --verbose'
-                ].join('&&')
-            },
-            bower_update: {
-                command: 'node_modules/bower/bin/bower update --verbose'
-            }
-        },
 
         /**
          * The directories to delete when `grunt clean` is executed.
@@ -737,7 +749,7 @@ module.exports = function (grunt) {
              */
             bowerfile: {
                 files: 'bower.json',
-                tasks: ['shell:bower_install'],
+                tasks: ['shell:bower_prune', 'bower'],
                 options: { livereload: false }
             },
 
@@ -932,7 +944,7 @@ module.exports = function (grunt) {
 
     grunt.registerTask('init', 'install bower components if not already installed', function() {
         if(!grunt.file.isDir(grunt.config('folders.vendor'))) {
-            grunt.task.run('shell:bower_install');
+            grunt.task.run('bower');
         }
     });
 

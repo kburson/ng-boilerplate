@@ -84,11 +84,12 @@ module.exports = {
          */
         vendor: {
             js: [
+                '<%= folders.vendor %>/angular/angular.js',
                 '<%= folders.vendor %>/angular/index.js',
                 '<%= folders.vendor %>/angular-resource/index.js',
                 '<%= folders.vendor %>/angular-placeholders/angular-placeholders.js',
                 '<%= folders.vendor %>/angular-ui-router/release/angular-ui-router.js',
-                '<%= folders.vendor %>/angular-ui-utils/modules/route/route.js',
+                '<%= folders.vendor %>/angular-ui-utils/modules/route.js',
 
                 /* with angular-boostrap, do we need bootstrap-less ? */
                 '<%= folders.vendor %>/angular-bootstrap/ui-bootstrap-tpls.min.js'

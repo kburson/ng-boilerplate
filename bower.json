@@ -1,6 +1,6 @@
 {
     "name": "ng-boilerplate",
-    "version": "0.3.0",
+    "version": "0.3.1",
 
     "dependencies": {
         "angular": "http://code.angularjs.org/1.1.5/angular.js",
@@ -16,6 +16,25 @@
         "angular-mocks": "http://code.angularjs.org/1.1.5/angular-mocks.js",
         "angular-scenario": "http://code.angularjs.org/1.1.5/angular-scenario.js",
         "ngMidwayTester": "yearofmoo/ngMidwayTester"
+    },
+
+    "exportsOverride": {
+        "angular": {
+            ".": "*.js"
+        },
+        "bootstrap-less": {
+            "js": "js/*.js",
+            "less":"less/*.less",
+            "img":"img/*.*"
+        },
+        "angular-ui-router": {
+            "lib": "lib/*.js",
+            "release": "release/*.js"
+        },
+        "angular-ui-utils": {
+            "demo": "demo/*.js",
+            "modules": "modules/**/*.*"
+        }
     },
 
     "disabled-dependencies": {
