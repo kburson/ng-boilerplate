@@ -44,7 +44,9 @@ module.exports = function (grunt) {
         changelog: {
             options: {
                 dest: '<%= folders.docs %>/CHANGELOG.md',
-                template: '<%= folders.config %>/changelog.tpl'
+                template: '<%= folders.config %>/changelog.tpl',
+                github: '<%= pkg.repository.url %>',
+                version: '<%= pkg.version %>'
             }
         },
 
@@ -70,6 +72,12 @@ module.exports = function (grunt) {
             },
             bower_prune: {
                 command: 'node_modules/bower/bin/bower prune --verbose'
+            },
+            kill_server: {
+                command: [
+                    'ps -eo pid,command | grep "phantomjs" | grep -v "grep" ',
+                    'ps -eo pid,command | grep "phantomjs" | grep -v "grep" | awk "{ print $1 }" | xargs kill -9'
+                ].join('&&')
             }
         },
 
@@ -589,20 +597,23 @@ module.exports = function (grunt) {
                 frameworks: ['mocha','chai'], // mocha only for coffee tests
                 configFile: '<%= folders.build %>/karma.unit.conf.coffee',
                 browsers: [ 'Chrome'],
-                //port: 9001,
+                port: 9001, // server listening on port
                 runnerPort: 9101
+                //,background: false
             },
 
             midway: {
                 //frameworks: ['jasmine'],
                 frameworks: ['mocha','chai'], // mocha only for coffee tests
                 configFile: '<%= folders.build %>/karma.midway.conf.coffee',
-                //port: 9002,
+                port: 9002, // server listening on port
                 runnerPort: 9102
+                //,background: false
             },
 
             e2e: {
                 configFile: '<%= folders.build %>/karma.e2e.conf.coffee',
+                //background: false,
                 port: 9003, // where karma runs
                 runnerport: '<%= express.testserver.options.port %>', // where the app runs
                 urlRoot: '/_karma.e2e_/',
@@ -786,7 +797,12 @@ module.exports = function (grunt) {
                 files: [
                     '<%= files.app.js %>'
                 ],
-                tasks: ['jshint:src', 'karma:unit:run', 'karma:midway:run', 'karma:e2e:run', 'copy:build_appjs']
+                tasks: ['jshint:src',
+                        'karma:unit:run',
+                        'karma:midway:run',
+                        'karma:e2e:run',
+                        'copy:build_appjs'
+                ]
             },
 
             /**
@@ -800,7 +816,13 @@ module.exports = function (grunt) {
                     '<%= files.test.midway.coffee %>',
                     '<%= files.test.e2e.coffee %>'
                 ],
-                tasks: [ 'coffeelint:src', 'coffee:source', 'karma:unit:run', 'karma:midway:run', 'karma:e2e:run', 'copy:build_appjs' ]
+                tasks: [ 'coffeelint:src',
+                         'coffee:source',
+                         'karma:unit:run',
+                         'karma:midway:run',
+                         'karma:e2e:run',
+                         'copy:build_appjs'
+                ]
             },
 
             /**

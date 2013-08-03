@@ -52,3 +52,4 @@ describe 'ngBoilerplate', ->
             proxy = once(callback)
             proxy()
             expect(callback.called).is.true
+
