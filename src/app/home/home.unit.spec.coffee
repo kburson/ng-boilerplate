@@ -1,6 +1,8 @@
 "use strict"
 
 expect = chai.expect
+should = chai.should()
+assert = chai.assert
 
 ###
 Tests sit right alongside the file they are testing, which is more intuitive
@@ -19,5 +21,7 @@ describe "ngBoilerplate.home", ->
         )
     )
     it "should have a HomeCtrl", ->
-        expect(HomeCtrl).to.not.be.undefined
+        expect(HomeCtrl).is.defined
 
+    it "should be true", ->
+        true.should.be.ok

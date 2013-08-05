@@ -50,6 +50,15 @@ module.exports = function (grunt) {
             }
         },
 
+        /*
+        browser dependency manager.  Download frameworks and libraries that used by the browser.
+        This is different than npm package manager used for build and dev tools.
+        use :  grunt bower
+        this depends on the component packages having a properly formatted bower.json file with a 'main' attribute
+        set to the list of files that are necessary for deployment.
+        If the library you are useing does not have a properly formmatted bower.json file then you must override
+        the export functionality in your bower.json to identify which library files you want copied to your project.
+         */
         bower: {
             install: {
                 //just run 'grunt bower:install' and you'll see files from your Bower packages in lib directory
@@ -66,18 +75,27 @@ module.exports = function (grunt) {
 
         shell: {
             options: {
-                //failOnError:true,
+                failOnError:true,
                 stderr: true,
                 stdout: true
             },
             bower_prune: {
                 command: 'node_modules/bower/bin/bower prune --verbose'
             },
-            kill_server: {
+            kill_phantom: {
                 command: [
                     'ps -eo pid,command | grep "phantomjs" | grep -v "grep" ',
                     'ps -eo pid,command | grep "phantomjs" | grep -v "grep" | awk "{ print $1 }" | xargs kill -9'
                 ].join('&&')
+            },
+            install_selenium: {
+                command: './node_modules/protractor/bin/install_selenium_standalone'
+            },
+            start_selenium: {
+                command: 'java -jar selenium/selenium-server-standalone-2.33.0.jar -Dwebdriver.chrome.driver=./selenium/chromedriver 2> /dev/null :3 &'
+            },
+            stop_selenium: {
+                command: 'curl "http://localhost:4444/selenium-server/driver/?cmd=shutDownSeleniumServer"'
             }
         },
 
@@ -238,8 +256,8 @@ module.exports = function (grunt) {
         },
 
         /**
-         * `ng-min` annotates the sources before minifying. That is, it allows us
-         * to code without the array syntax.
+         * `ng-min` annotates the sources before minifying.
+         * That is, it allows us to code without the angular injection array syntax.
          */
         ngmin: {
             compile: {
@@ -306,7 +324,7 @@ module.exports = function (grunt) {
         },
 
         /**
-         * Minify the sources!
+         * Minify the concatenated sources!
          */
         uglify: {
             compile: {
@@ -367,7 +385,7 @@ module.exports = function (grunt) {
         jshint: {
 
             options: {
-                jshintrc: '<%= folders.config %>/jshintrc'
+                jshintrc: '<%= folders.config %>/jshint.json'
             },
 
             src: {
@@ -404,11 +422,22 @@ module.exports = function (grunt) {
          */
         express: {
             /**
-             * Testserver instance for e2e tests.
+             * express server instance for unit tests.
              */
-            testserver: {
+            test: {
                 options: {
-                    port: 9009,
+                    port: 9200,
+                    hostname: 'localhost',
+                    bases: ['<%= folders.build %>']
+                }
+            },
+
+            /**
+             * express server instance for unit tests.
+             */
+            e2e: {
+                options: {
+                    port: 9300,
                     hostname: 'localhost',
                     bases: ['<%= folders.build %>']
                 }
@@ -416,10 +445,9 @@ module.exports = function (grunt) {
 
             livereload: {
                 options: {
-                    port: 9200,
-                    // change this to '0.0.0.0' to access the server from outside
-                    hostname: '*',
                     livereload: true,
+                    port: 9400,
+                    hostname: 'localhost', // '*',  change this to '0.0.0.0' to access the server from outside
                     bases: [ userConfig.folders.build ]
                 }
             }
@@ -443,8 +471,6 @@ module.exports = function (grunt) {
                 nonull: true,
                 expand: true,
                 files: [
-                    //{src: ['<%= folders.test.unit %>/**/*.coffee']},
-                    //{src: ['test/unit/**/*.coffee']},
                     {src: ['<%= files.test.unit.coffee %>']},
                     {src: ['<%= files.test.midway.coffee %>']},
                     {src: ['<%= files.test.e2e.coffee %>']}
@@ -488,6 +514,20 @@ module.exports = function (grunt) {
         /**
          * The `index` task compiles the `index.html` file as a Grunt template. CSS
          * and JS files co-exist here but they get split apart later.
+         * With this method you specify your application sources in the build.config.js file.
+         * These identified (minimatch/glob) source files are inserted into script tags in
+         * the index.html file.  The css files are inserted into style tags in the index.html.
+         *
+         * Another option is to use the usemin task.  With usemin you identify specific resources
+         * manually in the index.html, but you can wrap specific groups of scripts and css files
+         * in html comment directives to identify which groups to concatenate for the final product.
+         * When compile the distribution source these groups are compressed into single files and the
+         * script tags are replaced with references to the single files.
+         *
+         * You will still need to identify the folders and source patterns in the build.config.js
+         * for the rest of the build system to manage.  grunt-usemin provides more flexability
+         * in how you package your sources, but you are required to maange the individual script/css
+         * tag inclusions in the main app index.html files.
          */
         index: {
 
@@ -523,6 +563,10 @@ module.exports = function (grunt) {
             }
         },
 
+        open: {// open browser to hosted location
+            server: { url: 'http://localhost:9400' }
+        },
+
         /**
          * The Karma configurations.
          *
@@ -548,7 +592,7 @@ module.exports = function (grunt) {
         karma: {
             options: {
                 basePath: '../', // project root relative to karma.config file, prepend to all file paths
-                urlRoot: '/',
+                urlRoot: '/',    // how to get to this app from the browser
 
                 hostname: 'localhost',
 
@@ -559,101 +603,161 @@ module.exports = function (grunt) {
                 singleRun: false,
                 autoWatch: false,
 
-                colors: true,
-                loggers: [
-                    {type: 'console'}
-                ],
+                loggers: [ {type: 'console'} ],
                 logLevel: 'WARN',
+                colors: true,
 
                 reporters: ['progress'], // 'dots','progress'
                 reportSlowerThan: 500,
                 captureTimeout: 5000,
 
+                //plugins: [
+                //    //'karma-jasmine',
+                //    'karma-mocha',
+                //    'karma-chai',
+                //    //'karma-ng-scenario',
+                //    //'karma-chrome-launcher',
+                //    //'karma-firefox-launcher',
+                //    //'karma-safari-launcher',
+                //    //'karma-phantomjs-launcher',
+                //    //'karma-script-launcher',
+                //    'karma-coffee-preprocessor',
+                //    'karma-html2js-preprocessor',
+                //    'karma-requirejs'
+                //],
+                preprocessors: {
+                    '**/*.coffee': 'coffee',
+                    'src/**/*.js': ['coverage']
+                },
+                coffeePreprocessor: {
+                    options: {
+                        sourceMap: true,
+                        bare: true
+                    }
+                },
+                coverageReporter: {
+                    type : 'html',
+                    dir : '<%folders.build%>/coverage/'
+                }
+            },
+
+            watch_unit: {
+                configFile: '<%= folders.build %>/karma.unit.conf.coffee',
                 plugins: [
-                    'karma-jasmine',
                     'karma-mocha',
                     'karma-chai',
-                    'karma-ng-scenario',
-                    'karma-chrome-launcher',
-                    'karma-firefox-launcher',
-                    'karma-safari-launcher',
+                    'karma-coverage',
                     'karma-phantomjs-launcher',
-                    'karma-script-launcher',
                     'karma-coffee-preprocessor',
                     'karma-html2js-preprocessor',
                     'karma-requirejs'
                 ],
-                preprocessors: { '**/*.coffee': 'coffee' },
-                coffeePreprocessor: {
-                    options: {
-                        //sourceMap: true,
-                        bare: true
-                    }
-                }
-            },
-
-            unit: {
                 //frameworks: ['jasmine'],
                 frameworks: ['mocha','chai'], // mocha only for coffee tests
-                configFile: '<%= folders.build %>/karma.unit.conf.coffee',
-                browsers: [ 'Chrome'],
+                background: true,
+                //browsers: [ 'Chrome'],
                 port: 9001, // server listening on port
                 runnerPort: 9101
-                //,background: false
             },
 
-            midway: {
+            watch_midway: {
+                configFile: '<%= folders.build %>/karma.midway.conf.coffee',
+                plugins: [
+                    'karma-mocha',
+                    'karma-chai',
+                    'karma-coverage',
+                    'karma-phantomjs-launcher',
+                    'karma-coffee-preprocessor',
+                    'karma-html2js-preprocessor',
+                    'karma-requirejs'
+                ],
                 //frameworks: ['jasmine'],
                 frameworks: ['mocha','chai'], // mocha only for coffee tests
-                configFile: '<%= folders.build %>/karma.midway.conf.coffee',
+                background: true,
                 port: 9002, // server listening on port
                 runnerPort: 9102
-                //,background: false
             },
 
-            e2e: {
-                configFile: '<%= folders.build %>/karma.e2e.conf.coffee',
-                //background: false,
-                port: 9003, // where karma runs
-                runnerport: '<%= express.testserver.options.port %>', // where the app runs
-                urlRoot: '/_karma.e2e_/',
-                proxies:{ '/': 'http://localhost:<%= express.testserver.options.port %>/'},
-                browsers: ['Chrome'],
-                frameworks: ['ng-scenario']
-            },
+//            watch_e2e: {
+//                configFile: '<%= folders.build %>/karma.e2e.conf.coffee',
+//                plugins: [
+//                    'karma-jasmine',
+//                    'karma-ng-scenario',
+//                    'karma-coverage',
+//                    'karma-chrome-launcher',
+//                    'karma-coffee-preprocessor',
+//                    'karma-html2js-preprocessor',
+//                    'karma-requirejs'
+//                ],
+//                frameworks: ['ng-scenario','mocha','chai'],
+//                background: false,
+//                port: 9003, // where karma runs
+//                runnerport: '<%= express.e2e.options.port %>', // where the app runs
+//                urlRoot: '/_karma.e2e_/',
+//                proxies:{ '/': 'http://localhost:<%= karma.watch_e2e.runnerPort %>/'},
+//                browsers: ['Chrome'],
+//                autowatch: true
+//            },
 
-            continuous_unit: {
+            ci_unit: {
+                configFile: '<%= folders.build %>/karma.unit.conf.coffee',
+                plugins: [
+                    'karma-mocha',
+                    'karma-chai',
+                    'karma-coverage',
+                    'karma-phantomjs-launcher',
+                    'karma-coffee-preprocessor',
+                    'karma-html2js-preprocessor',
+                    'karma-requirejs'
+                ],
                 //frameworks: ['jasmine'],
                 frameworks: ['mocha','chai'], // mocha only for coffee tests
-                configFile: '<%= folders.build %>/karma.unit.conf.coffee',
                 port: 9011,
                 runnerPort: 9111,
                 singleRun: true,
                 background: false
             },
 
-            continuous_midway: {
+            ci_midway: {
+                configFile: '<%= folders.build %>/karma.midway.conf.coffee',
+                plugins: [
+                    'karma-mocha',
+                    'karma-chai',
+                    'karma-coverage',
+                    'karma-phantomjs-launcher',
+                    'karma-coffee-preprocessor',
+                    'karma-html2js-preprocessor',
+                    'karma-requirejs'
+                ],
                 //frameworks: ['jasmine'],
                 frameworks: ['mocha','chai'], // mocha only for coffee tests
-                configFile: '<%= folders.build %>/karma.midway.conf.coffee',
                 port: 9012,
                 runnerPort: 9112,
                 singleRun: true,
                 background: false
 
-            },
-
-            continuous_e2e: {
-                configFile: '<%= folders.build %>/karma.e2e.conf.coffee',
-                port: 9013, // where karma runs
-                runnerPort: '<%= express.testserver.options.port %>', // where the app runs
-                urlRoot: '/_karma.e2e_/',
-                proxies:{ '/': 'http://localhost:<%= karma.continuous_e2e.runnerPort %>/'},
-                frameworks: ['ng-scenario'],
-                browsers: ['Chrome'],
-                singleRun: true,
-                background: false
             }
+
+//            ci_e2e: {
+//                configFile: '<%= folders.build %>/karma.e2e.conf.coffee',
+//                plugins: [
+//                    'karma-jasmine',
+//                    'karma-ng-scenario',
+//                    'karma-coverage',
+//                    'karma-chrome-launcher',
+//                    'karma-coffee-preprocessor',
+//                    'karma-html2js-preprocessor',
+//                    'karma-requirejs'
+//                ],
+//                frameworks: ['ng-scenario'],
+//                port: 9013, // where karma runs
+//                runnerPort: '<%= express.e2e.options.port %>', // where the app runs
+//                urlRoot: '/_karma.e2e_/',
+//                proxies:{ '/': 'http://localhost:<%= karma.ci_e2e.runnerPort %>/'},
+//                browsers: ['Chrome'],
+//                singleRun: true,
+//                background: false
+//            }
         },
 
 
@@ -662,76 +766,68 @@ module.exports = function (grunt) {
          * don't have to be managed manually.
          */
         karmaconfig: {
+            options: {
+                patterns: [
+                    //{pattern: '<%=folders.test.test %>/mocha.conf.coffee', watched: false, served: false},
+                    //{pattern: '<%=folders.test.test %>/chai.helpers.coffee', watched: false, served: false},
+                    {pattern: '<%= files.vendor.js %>', watched: false},
+                    {pattern: '<%= html2js.app.dest %>', watched: true},
+                    {pattern: '<%= html2js.common.dest %>', watched: true},
+                    {pattern: '<%= files.app.js %>', watched: true},
+                    {pattern: '<%= files.app.coffee %>', watched: true}
+                ]
+            },
 
             unit: {
                 template: '<%= folders.config %>/karma.config.tpl.coffee',
                 dest: '<%= folders.build %>/karma.unit.conf.coffee',
-                src: [
-                    '<%= files.vendor.js %>',
-
-                    'node_modules/sinon/pkg/sinon.js',
-                    'vendor/angular-mocks/index.js',
-
-                    '<%= html2js.app.dest %>',
-                    '<%= html2js.common.dest %>',
-                    /*
-                    '{ pattern: <%= files.app.js %>, watched: true }',
-                    '{ pattern: <%= files.test.unit.js %>, watched: true }',
-
-                    '{ pattern: <%= files.app.coffee %>, watched: true }',
-                    '{ pattern: <%= files.test.unit.coffee %>, watched: true }'
+                patterns: [
+                    /*{pattern: '<%= files.vendor.js %>', watched: false},
+                    {pattern: '<%= html2js.app.dest %>', watched: true},
+                    {pattern: '<%= html2js.common.dest %>', watched: true},
+                    {pattern: '<%= files.app.js %>', watched: true},
+                    {pattern: '<%= files.app.coffee %>', watched: true},
                     */
+                    {pattern: 'vendor/angular-mocks/index.js', watched: false},
+                    {pattern: 'node_modules/sinon/pkg/sinon.js', watched: false},
 
-                    '<%= files.app.js %>',
-                    '<%= files.test.unit.js %>',
-
-                    '<%= files.app.coffee %>',
-                    '<%= files.test.unit.coffee %>'
-
-                    // { pattern: 'app/**/*.coffee', watched: true}  // try this format
+                    {pattern: '<%= files.test.unit.js %>', watched: true},
+                    {pattern: '<%= files.test.unit.coffee %>', watched: true}
                 ]
             },
 
             midway: {
                 template: '<%= folders.config %>/karma.config.tpl.coffee',
                 dest: '<%= folders.build %>/karma.midway.conf.coffee',
-                src: [
-                    '<%= files.vendor.js %>',
-                    'vendor/ngMidwayTester/Source/ngMidwayTester.js',
-                    'node_modules/sinon/pkg/sinon.js',
+                patterns: [
+                    {pattern: '<%= files.vendor.js %>', watched: false},
+                    {pattern: '<%= html2js.app.dest %>', watched: false},
+                    {pattern: '<%= html2js.common.dest %>', watched: false},
+                    {pattern: '<%= files.app.js %>', watched: true},
+                    {pattern: '<%= files.app.coffee %>', watched: true},
 
-                    '<%= html2js.app.dest %>',
-                    '<%= html2js.common.dest %>',
+                    {pattern: 'vendor/ngMidwayTester/Source/ngMidwayTester.js', watched: false},
+                    {pattern: 'node_modules/sinon/pkg/sinon.js', watched: false},
 
-                    '<%= files.app.js %>',
-                    '<%= files.test.midway.js %>',
-
-                    '<%= files.app.coffee %>',
-                    '<%= files.test.midway.coffee %>'
-
-                    // { pattern: 'app/**/*.coffee', watched: true}  // try this format
-                ]
-            },
-
-            e2e: {
-                template: '<%= folders.config %>/karma.config.tpl.coffee',
-                dest: '<%= folders.build %>/karma.e2e.conf.coffee',
-                src: [
-                    '<%= files.vendor.js %>',
-
-                    '<%= html2js.app.dest %>',
-                    '<%= html2js.common.dest %>',
-
-                    '<%= files.app.js %>',
-                    '<%= files.test.e2e.js %>',
-
-                    '<%= files.app.coffee %>',
-                    '<%= files.test.e2e.coffee %>'
-
-                    // { pattern: 'app/**/*.coffee', watched: true}  // try this format
-
+                    {pattern: '<%= files.test.midway.js %>', watched: true},
+                    {pattern: '<%= files.test.midway.coffee %>', watched: true}
                 ]
             }
+
+//            e2e: {
+//                template: '<%= folders.config %>/karma.config.tpl.coffee',
+//                dest: '<%= folders.build %>/karma.e2e.conf.coffee',
+//                patterns: [
+//                   /* {pattern: '<%= files.vendor.js %>', watched: false},
+//                    {pattern: '<%= html2js.app.dest %>', watched: false},
+//                    {pattern: '<%= html2js.common.dest %>', watched: false},
+//                    {pattern: '<%= files.app.js %>', watched: true},
+//                    {pattern: '<%= files.app.coffee %>', watched: true},
+//                    */
+//                    {pattern: '<%= files.test.e2e.js %>', watched: true},
+//                    {pattern: '<%= files.test.e2e.coffee %>', watched: true}
+//                ]
+//            }
         },
 
         /**
@@ -761,11 +857,9 @@ module.exports = function (grunt) {
              * your Gruntfile changes, it will automatically be reloaded!
              */
             gruntfile: {
-                files: 'Gruntfile.js',
+                files: [ 'Gruntfile.js' ],
                 tasks: ['jshint:gruntfile'],
-                options: {
-                    livereload: false
-                }
+                options: { livereload: false }
             },
 
             /**
@@ -773,7 +867,7 @@ module.exports = function (grunt) {
              * to get any new dependencies
              */
             bowerfile: {
-                files: 'bower.json',
+                files: [ 'bower.json' ],
                 tasks: ['shell:bower_prune', 'bower'],
                 options: { livereload: false }
             },
@@ -782,11 +876,9 @@ module.exports = function (grunt) {
              * When the build.conf.js changes, we just want to lint it. In fact, when
              */
             buildconf: {
-                files: '<%= folders.config %>/build.config.js',
+                files: [ '<%= folders.config %>/build.config.js' ] ,
                 tasks: ['jshint:buildconf'],
-                options: {
-                    livereload: false
-                }
+                options: { livereload: false }
             },
 
             /**
@@ -794,13 +886,11 @@ module.exports = function (grunt) {
              * we want to lint them and run our tests.
              */
             jssrc: {
-                files: [
-                    '<%= files.app.js %>'
-                ],
+                files: [ '<%= files.app.js %>' ],
                 tasks: ['jshint:src',
-                        'karma:unit:run',
-                        'karma:midway:run',
-                        'karma:e2e:run',
+                        'karma:watch_unit:run',
+                        'karma:watch_midway:run',
+                        //'karma:watch_e2e:run',
                         'copy:build_appjs'
                 ]
             },
@@ -810,17 +900,12 @@ module.exports = function (grunt) {
              * run our unit tests.
              */
             coffeesrc: {
-                files: [
-                    '<%= files.app.coffee %>',
-                    '<%= files.test.unit.coffee %>',
-                    '<%= files.test.midway.coffee %>',
-                    '<%= files.test.e2e.coffee %>'
-                ],
+                files: ['<%= files.app.coffee %>'],
                 tasks: [ 'coffeelint:src',
                          'coffee:source',
-                         'karma:unit:run',
-                         'karma:midway:run',
-                         'karma:e2e:run',
+                         'karma:watch_unit:run',
+                         'karma:watch_midway:run',
+                         //'karma:watch_e2e:run',
                          'copy:build_appjs'
                 ]
             },
@@ -830,9 +915,7 @@ module.exports = function (grunt) {
              * files, so this is probably not very useful.
              */
             assets: {
-                files: [
-                    '<%= folders.assets %>/**/*'
-                ],
+                files: [ '<%= folders.assets %>/**/*' ],
                 tasks: [ 'copy:build_assets' ]
             },
 
@@ -868,33 +951,21 @@ module.exports = function (grunt) {
              * run the tests. We don't want to do any live reloading.
              */
             jsunit: {
-                files: [
-                    '<%= files.test.unit.js %>'
-                ],
-                tasks: [ 'jshint:test', 'karma:unit:run' ],
-                options: {
-                    livereload: false
-                }
+                files: [ '<%= files.test.unit.js %>' ],
+                tasks: [ 'jshint:test', 'karma:watch_unit:run' ],
+                options: { livereload: false }
             },
 
             jsmidway: {
-                files: [
-                    '<%= files.test.midway.js %>'
-                ],
-                tasks: [ 'jshint:test', 'karma:midway:run' ],
-                options: {
-                    livereload: false
-                }
+                files: [ '<%= files.test.midway.js %>' ],
+                tasks: [ 'jshint:test', 'karma:watch_midway:run' ],
+                options: { livereload: false }
             },
 
             jse2e: {
-                files: [
-                    '<%= files.test.e2e.js %>'
-                ],
-                tasks: [ 'jshint:test', 'karma:e2e:run' ],
-                options: {
-                    livereload: false
-                }
+                files: [ '<%= files.test.e2e.js %>' ],
+                tasks: [ 'jshint:test'], //, 'karma:watch_e2e:run' ],
+                options: { livereload: false }
             },
 
             /**
@@ -902,34 +973,30 @@ module.exports = function (grunt) {
              * run the unit tests. We don't want to do any live reloading.
              */
             coffeeunit: {
-                files: [
-                    '<%= files.test.unit.coffee %>'
-                ],
-                tasks: [ 'coffeelint:test', 'karma:unit:run' ],
-                options: {
-                    livereload: false
-                }
+                files: [ '<%= files.test.unit.coffee %>' ],
+                tasks: [ 'coffeelint:test', 'karma:watch_unit:run' ],
+                options: { livereload: false }
             },
 
             coffeemidway: {
-                files: [
-                    '<%= files.test.midway.coffee %>'
-                ],
-                tasks: [ 'coffeelint:test', 'karma:midway:run' ],
-                options: {
-                    livereload: false
-                }
+                files: [ '<%= files.test.midway.coffee %>' ],
+                tasks: [ 'coffeelint:test', 'karma:watch_midway:run' ],
+                options: { livereload: false }
             },
 
             coffeee2e: {
-                files: [
-                    '<%= files.test.e2e.coffee %>'
-                ],
-                tasks: [ 'coffeelint:test', 'karma:e2e:run' ],
-                options: {
-                    livereload: false
-                }
+                files: [ '<%= files.test.e2e.coffee %>' ],
+                tasks: [ 'coffeelint:test'],//, 'karma:watch_e2e:run' ],
+                options: { livereload: false }
             }
+        },
+
+        concurrent: {
+            tests: [
+                'karma:ci_unit',
+                'karma:ci_midway'//,
+                //'karma:ci_e2e'
+            ]
         }
     };
 
@@ -951,14 +1018,38 @@ module.exports = function (grunt) {
      */
     grunt.renameTask('watch', 'delta');
 
+
+    grunt.registerTask('dev_server', function(){
+        grunt.task.run([ 'open', 'express:livereload', 'express-keepalive']);
+    });
+
+    /*
+    The test servers stay in process as long as the grunt process is running.
+    When running with the 'grunt-watch' (renamed 'delta') this holds the grunt process alive forever.
+    The build target executes the 'ci' versions of the karma tests, this means they are scheduled for a single run only,
+    although the servers are held in processes until the watch process completes.
+    This effectively blocks the tests from running a subsequent time when any files change.
+    To solve this you MUST run build separately from
+     */
     grunt.registerTask('watch', function () {
-        //grunt.task.requires('build');
         grunt.task.run([
             'build',
-            'express:livereload',
-            'delta'
+            'shell:kill_phantom',
+            'karma:watch_unit',            // single_run = false
+            'karma:watch_midway',          // single_run = false
+            //'express:e2e',  // to serve app to e2e tests
+            //'karma:watch_e2e',             // acceptance tests
+            //'express:livereload',    // allow dev to see ui changes live
+            'delta'                  // watch for file changes and trigger build events
         ]);
     });
+
+    /**
+     * The `build` task gets your app ready to run for development and testing.
+     */
+//    grunt.registerTask('watch_e2e', function () {
+//        grunt.task.run([ 'express:e2e', 'karma:watch_e2e' ]);
+//    });
 
 
     /**
@@ -966,7 +1057,7 @@ module.exports = function (grunt) {
      */
     grunt.registerTask('default', function () {
         //grunt.task.requires('build');
-        grunt.task.run(['init', 'build', 'compile']);
+        grunt.task.run(['init', 'build', 'test', 'compile']);
     });
 
     grunt.registerTask('init', 'install bower components if not already installed', function() {
@@ -979,25 +1070,7 @@ module.exports = function (grunt) {
      * The `build` task gets your app ready to run for development and testing.
      */
     grunt.registerTask('build', function () {
-        //grunt.task.requires('build');
-        grunt.task.run([
-            'clean',
-            'html2js',
-            'jshint',
-            'coffeelint',
-            'coffee',
-            'recess:build',
-            'copy:build_assets',
-            'copy:build_appjs',
-            'copy:build_vendorjs',
-            'copy:build_vendorcss', // ??
-            'index:build',
-            'karmaconfig',
-            'karma:continuous_unit',
-            'karma:continuous_midway',
-            'express:testserver',
-            'karma:continuous_e2e'
-        ]);
+        grunt.task.run([ 'quick-build', 'assemble' ]);
     });
 
 
@@ -1006,7 +1079,6 @@ module.exports = function (grunt) {
      * from build task, because travis ci can't handle less etc.
      */
     grunt.registerTask('quick-build', function () {
-        grunt.task.requires('build');
         grunt.task.run([
             'clean',
             'html2js',
@@ -1017,6 +1089,28 @@ module.exports = function (grunt) {
         ]);
     });
 
+    grunt.registerTask('assemble', function() {
+        grunt.task.requires('quick-build');
+        grunt.task.run([
+            'recess:build',
+            'copy:build_assets',
+            'copy:build_appjs',
+            'copy:build_vendorjs',
+            'copy:build_vendorcss', // ??
+            'index:build'
+        ]);
+    });
+
+    grunt.registerTask('test', function() {
+        grunt.task.requires('quick-build');
+        grunt.task.run([
+            'karma:ci_unit',
+            'karma:ci_midway'//,
+            //'express:e2e',
+            //'karma:ci_e2e'
+        ]);
+    });
+
 
     /**
      * The `compile` task gets your app ready for deployment by concatenating and
@@ -1024,7 +1118,8 @@ module.exports = function (grunt) {
      */
     grunt.registerTask('compile', function () {
         grunt.task.requires('build');
-        grunt.task.run(['recess:compile',
+        grunt.task.run([
+            'recess:compile',
             'copy:compile_assets',
             'ngmin',
             'concat:compile_js',
@@ -1110,17 +1205,58 @@ module.exports = function (grunt) {
      * The `karma/*` files are compiled as grunt templates for use by Karma. Yay!
      */
     grunt.registerMultiTask('karmaconfig', 'Process karma config templates', function () {
-        var files = this.filesSrc;
-        //console.log("\n-------------\nthis:\n", this,"\n--------------\n")
-        //console.log("\n-------------\nfiles:\n", files,"\n--------------\n")
-        //console.log("\n-------------\nfiles.src:\n", this.files[0].src,"\n--------------\n")
 
+        //console.log("karma config: \n",this);
+
+        var patterns = this.data.patterns;
+        //console.log("karma target patterns: \n",patterns);
+
+        var options = this.options();
+        //console.log("karma config options: \n",options);
+        if (options !== undefined && options.patterns !== undefined) {
+            patterns = options.patterns.concat(patterns);
+        }
+        //console.log("karma combined patterns: \n",patterns);
+
+        var files = [];
+        patterns.forEach( function(item){
+            /**
+             * @attribute: watched, @type: boolean, @default: true
+             * @description: If karma autoWatch is true all files that have set watched
+             * to true will be watched for changes.
+            **/
+            var watched = item.watched === undefined ? true: item.watched;
+            /**
+             * @attribute: served, @type: boolean, @default: true
+             * @description: Should the files be served by Karma's webserver?
+             */
+            var served = item.served === undefined ? true : item.served;
+            /**
+             * @attribute: included, @type: Boolean, @default:  true
+             * @description: Should the files be included in the browser using <script> tag?
+             * Use false if you wanna load them manually, eg. using Require.js.
+            **/
+            var included = item.included === undefined ? true : item.included;
+            // get the list of files for this pattern
+            //console.log('get list for [',item.pattern,']');
+            var list = grunt.file.expand(item.pattern);
+            //console.log('files: [', list, ']');
+
+            list.forEach(function(file) {
+                var obj = {pattern:  '' + file + ''};
+                if (!watched) { obj.watched = false;}
+                if (!served) { obj.watched = false;}
+                if (!included) { obj.included = false;}
+                //console.log("add pattern: ", obj);
+                files.push(obj);
+            });
+        });
         grunt.file.copy(this.data.template, this.data.dest, {
             process: function (contents) {
                 //console.log("\n-------------\ncontents:\n", contents,"\n--------------\n")
                 return grunt.template.process(contents, {
                     data: {
-                        scripts: files
+                        patterns: files
                     }
                 });
             }
@@ -1128,6 +1264,7 @@ module.exports = function (grunt) {
     });
 
 
+    // NOTES: These are experimental only to help me learn the grunt universe
     grunt.registerTask('print', function (grunt) {
         //console.log("this.data.*:", this.data);
         //console.log("print config:\n",userConfig,"\n\n");

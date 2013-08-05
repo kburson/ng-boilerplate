@@ -7,6 +7,15 @@ Which was forked from [Josh Millers ngBoilerplate](http://joshdmiller.github.com
 and was customized for [Kendrick Burson](http://github.com/kburson/ng-Boilerplate).
 ***
 
+Why midway testing?
+
+http://blogs.burnsidedigital.com/2013/07/setting-up-midway-testing-to-angularjs-app/
+
+    When Unit testing your application it sometimes may get too complicated when you want to test a application-level operation (like a page loading or XHR request) because you will need to use interceptors and mocks to make requests and templating work (basically anything XHR’ish). E2E testing may not also be the best option because it may be too high level to capture to test for certain features. For example, how do you test a controller on your website that performs a XHR request which downloads the user’s session details on every page? …
+
+
+
+
 ## Quick Start
 
 ### Installation
@@ -36,31 +45,12 @@ $ grunt watch # starts a server (http://localhost:9000), will wait on changes an
 ```
 
 
-#### IMPORTANT FIX:
-
-until the coffeelint pull request is completed you will need to modify your
-local **node_modules/grunt-coffeelint/tasks/coffeelint.js**
-
-add the following to the top of the task definition:
-```javascript
-    var errorCount = 0;
-    var warnCount = 0;
-    var files = this.filesSrc;
-    var options = this.options();
-
-    if (options.configFile != undefined) {
-        var config = grunt.file.readJSON(options.configFile);
-        options.configFile = undefined;
-        for (var key in options) {
-            config[key] = options[key];
-        }
-        options = config;
-    }
-```
 ### Testing (Unit, E2E, Midway)
 
 All Test are located in the `test` folder and Test-Runner for this project is 
 [Karma](http://karma-runner.github.io/).
+
+TODO: update for local karma under grunt-karma tasks....
 
 ```sh
 $ karma start # starts watching filechanges and runs trough all test
@@ -123,42 +113,42 @@ At a high level, the structure looks roughly like this:
 ```
 ng-boilerplate/
   |
-  +- assets/
-  |  +- img/
-  |  +- faviocon.ico
   +- config/
-  |  +- build.config.js
-  |  +- coffeelint.json
-  |  +- jshint.json
-  |  +- karma.config.tpl.coffee
-  |  +- changelog.tpl
-  |  +- module.prefix
-  |  +- module.suffix
-  |  +- <build config and template files>
+  |  |- build.config.js
+  |  |- coffeelint.json
+  |  |- jshint.json
+  |  |- karma.config.tpl.coffee
+  |  |- changelog.tpl
+  |  |- module.prefix
+  |  |- module.suffix
+  |  |- <build config and template files>
   +- docs/
   |  +- <generated docs for this project>
-  |- src/
-  |  |- app/
+  +- src/
+  |  +- assets/
+  |    +- img/
+  |    -- faviocon.ico
+  |  +- app/
   |  |  +- <app logic >
-  |  |- common/
+  |  +- common/
   |  |  +- <reusable code>
   |  +- less/
   |  |  +- <stylesheets as less preprocessor>
   |  +- test/
   |  |  +- <tests written in jasmine/mocha, not part of a specific feature>
-  |  +- index.html
+  |  |- index.html
   +- vendor/
   |  +- <bower components>
-  +- .bowerrc
-  +- .editorconfig
-  +- .gitignore
-  +- .gitmodules
-  +- .travis.yml;
-  +- Gruntfile.js
-  +- package.json
-  +- bower.json
-  +- LICENSE
-  +- README.md
+  |- .bowerrc
+  |- .editorconfig
+  |- .gitignore
+  |- .gitmodules
+  |- .travis.yml;
+  |- Gruntfile.js
+  |- package.json
+  |- bower.json
+  |- LICENSE
+  |- README.md
 ```
 What follows is a brief description of each entry, but most directories contain
 their own `README.md` file with additional documentation, so browse around to
@@ -439,19 +429,16 @@ Naturally, I am open to all manner of ideas and suggestions. See the
 See the [issues list](http://github.com/kburson/ng-boilerplate/issues). And
 feel free to submit your own!
 
+* **e2e** tests: what is a good name ? [ Acceptance, Functional, UI, Browser, Protractor]
+    * get e2 tests working under protractor
+
 * **contrib-imagemin**
 * **grunt-usemin** instead of 'index' task in grunt file
+
 * **grunt-cdn2** to prep assets for cdn deployment
 * **grunt-rev** for cache-busting
 
 * **grunt-contrib-jade** for index.html templating (similar to maven filters)
-
-* **grunt-concurrent** to speed up multiple targets
-
-#### pending todo:
-* get **karma-coffee-preprocessor** PR for sourceMap accepted.
-
-* can we target karma server in local project, or only in global install
 
 
 ### Contributing

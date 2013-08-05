@@ -1,5 +1,3 @@
-"use strict"
-
 ###
 Tests sit right alongside the file they are testing, which is more intuitive
 and portable than separating `src` and `test` directories. Additionally, the
@@ -8,7 +6,9 @@ automatically.
 ###
 describe "ngBoilerplate.home", ->
 
-    #expect = chai.expect
+    expect = chai.expect
+    should = chai.should()
+    assert = chai.assert
 
     HomeCtrl = undefined
     scope = undefined
@@ -23,5 +23,10 @@ describe "ngBoilerplate.home", ->
     )
 
     it "should have a HomeCtrl", ->
-        expect(HomeCtrl).to.not.equal.undefined
+        HomeCtrl.should.be.defined
+
+    it 'should be true', ->
+        true.should.be.ok
+        expect(true).to.be.ok
+        assert.isTrue(true,'error msg')
 

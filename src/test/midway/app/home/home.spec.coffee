@@ -3,7 +3,7 @@ should = chai.should()
 expect = chai.expect
 assert = chai.assert
 
-describe "ngBoilerplate.home", ->
+describe "ngBoilerplate.home (midway)", ->
 
     module = undefined
     deps = undefined
@@ -32,3 +32,5 @@ describe "ngBoilerplate.home", ->
     it "should have titleService dependency", ->
         expect(hasModule("titleService")).is.true
 
+    it "should be true", ->
+        true.should.be.ok
