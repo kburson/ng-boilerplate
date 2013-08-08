@@ -4,6 +4,7 @@ _build/
 _bin/
 node_modules/
 vendor/
+selenium
 
 .DS_Store
 

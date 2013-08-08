@@ -51,13 +51,13 @@ module.exports = function (grunt) {
         },
 
         /*
-        browser dependency manager.  Download frameworks and libraries that used by the browser.
-        This is different than npm package manager used for build and dev tools.
-        use :  grunt bower
-        this depends on the component packages having a properly formatted bower.json file with a 'main' attribute
-        set to the list of files that are necessary for deployment.
-        If the library you are useing does not have a properly formmatted bower.json file then you must override
-        the export functionality in your bower.json to identify which library files you want copied to your project.
+         browser dependency manager.  Download frameworks and libraries that used by the browser.
+         This is different than npm package manager used for build and dev tools.
+         use :  grunt bower
+         this depends on the component packages having a properly formatted bower.json file with a 'main' attribute
+         set to the list of files that are necessary for deployment.
+         If the library you are useing does not have a properly formmatted bower.json file then you must override
+         the export functionality in your bower.json to identify which library files you want copied to your project.
          */
         bower: {
             install: {
@@ -75,7 +75,7 @@ module.exports = function (grunt) {
 
         shell: {
             options: {
-                failOnError:true,
+                failOnError: false,
                 stderr: true,
                 stdout: true
             },
@@ -84,9 +84,18 @@ module.exports = function (grunt) {
             },
             kill_phantom: {
                 command: [
-                    'ps -eo pid,command | grep "phantomjs" | grep -v "grep" ',
-                    'ps -eo pid,command | grep "phantomjs" | grep -v "grep" | awk "{ print $1 }" | xargs kill -9'
+                    '(ps -eo pid,command | grep "phantomjs" | grep -v "grep")',
+                    '(ps -eo pid,command | grep "phantomjs" | grep -v "grep" | awk "{ print $1 }" | xargs kill -9 )'
                 ].join('&&')
+            },
+            kill_unit: {
+                command: '(lsof -P | grep <%= karma.unit.port %>) && (time lsof -P | grep <%= karma.unit.port %> | awk "{print $2}" | xargs echo | sed "s/ /, /g" | xargs kill -9 2&>1 /dev/null)'
+            },
+            kill_midway: {
+                command: '(lsof -P | grep <%= karma.midway.port %>) && (time lsof -P | grep <%= karma.unit.port %> | awk "{print $2}" | xargs echo | sed "s/ /, /g" | xargs kill -9 2&>1 /dev/null)'
+            },
+            kill_e2e: {
+                command: '(lsof -P | grep <%= karma.e2e.port %>) && (time lsof -P | grep <%= karma.unit.port %> | awk "{print $2}" | xargs echo | sed "s/ /, /g" | xargs kill -9 2&>1 /dev/null)'
             },
             install_selenium: {
                 command: './node_modules/protractor/bin/install_selenium_standalone'
@@ -567,21 +576,64 @@ module.exports = function (grunt) {
             server: { url: 'http://localhost:9400' }
         },
 
+        /* configurations for protractor functional tests (e2e) */
+        protractor: {
+
+        },
+
+        simplemocha: {
+            options: {
+                globals: ['should', 'expect', 'assert'],
+                timeout: 3000,   // timeout in milliseconds
+                ignoreLeaks: false,  // ignore global leaks
+                //grep: '*-test',   // string or regexp to filter tests with
+                ui: 'bdd',  // name "bdd", "tdd", "exports" etc
+                reporter: 'tap',  // reporter instance, defaults to `mocha.reporters.Dot`
+                //bail: true, // bail on the first test failure, default = true
+                slow: 30000 // milliseconds to wait before considering a test slow
+            },
+
+            e2e: {
+                src: ['src/test/e2e/**/*.mocha.coffee']
+            }
+        },
+
+
+        test: {
+            unit: {
+                port: 9010,
+                files: {
+                    src: [
+                        {pattern: 'vendor/angular-mocks/index.js', watched: false},
+                        {pattern: 'node_modules/sinon/pkg/sinon.js', watched: false},
+                        '<%= files.test.unit.js %>',
+                        '<%= files.test.unit.coffee %>'
+                    ]
+                }
+            },
+            midway: {
+                port: 9020,
+                files: {
+                    src: [
+                        {pattern: 'vendor/ngMidwayTester/Source/ngMidwayTester.js', watched: false},
+                        {pattern: 'node_modules/sinon/pkg/sinon.js', watched: false},
+                        '<%= files.test.midway.js %>',
+                        '<%= files.test.midway.coffee %>'
+                    ]
+                }
+            },
+            e2e: {
+
+            }
+        },
+
         /**
-         * The Karma configurations.
+         * The Karma options.
          *
          * The list of browsers to launch to test on. This includes only "Firefox" by
          * default, but other browser names include:
          * Chrome, ChromeCanary, Firefox, Opera, Safari, PhantomJS
-         *
-         * Note that you can also use the executable name of the browser, like "chromium"
-         * or "firefox", but that these vary based on your operating system.
-         *
-         * You may also leave this blank and manually navigate your browser to
-         * http://localhost:9018/ when you're running tests. The window/tab can be left
-         * open and the tests will automatically occur there during the build. This has
-         * the aesthetic advantage of not launching a browser every time you save.
-         *
+
          * basePath From where to look for files, starting with the location of karma config file.
          *
          * port: On which port should the browser connect,
@@ -591,40 +643,46 @@ module.exports = function (grunt) {
 
         karma: {
             options: {
-                basePath: '../', // project root relative to karma.config file, prepend to all file paths
+                basePath: '.', // project root relative to karma.config file, prepend to all file paths
                 urlRoot: '/',    // how to get to this app from the browser
 
                 hostname: 'localhost',
 
-                frameworks: ['jasmine'],   // mocha, jasmine, ng-scenario
                 browsers: [ 'PhantomJS'], // Chrome, ChromeCanary, Firefox, Opera, Safari, PhantomJS
 
                 background: true,
                 singleRun: false,
                 autoWatch: false,
 
-                loggers: [ {type: 'console'} ],
+                loggers: [
+                    {type: 'console'}
+                ],
                 logLevel: 'WARN',
                 colors: true,
 
-                reporters: ['progress'], // 'dots','progress'
+                reporters: ['spec'], // 'dots','progress', ['list', 'tap' for mocha]
                 reportSlowerThan: 500,
                 captureTimeout: 5000,
 
-                //plugins: [
-                //    //'karma-jasmine',
-                //    'karma-mocha',
-                //    'karma-chai',
-                //    //'karma-ng-scenario',
-                //    //'karma-chrome-launcher',
-                //    //'karma-firefox-launcher',
-                //    //'karma-safari-launcher',
-                //    //'karma-phantomjs-launcher',
-                //    //'karma-script-launcher',
-                //    'karma-coffee-preprocessor',
-                //    'karma-html2js-preprocessor',
-                //    'karma-requirejs'
-                //],
+                frameworks: ['mocha', 'chai', 'chai-as-promised', 'sinon-chai'], // mocha, jasmine, ng-scenario
+
+                plugins: [
+                    //'karma-jasmine',
+                    'karma-mocha',
+                    'karma-chai',
+                    'karma-coverage',
+                    'karma-chai-plugins',
+                    'karma-spec-reporter',
+                    //'karma-ng-scenario', // this is being replaced by protractor
+                    //'karma-chrome-launcher',
+                    //'karma-firefox-launcher',
+                    //'karma-safari-launcher',
+                    //'karma-script-launcher',
+                    'karma-phantomjs-launcher',
+                    'karma-coffee-preprocessor',
+                    'karma-html2js-preprocessor',
+                    'karma-requirejs'
+                ],
                 preprocessors: {
                     '**/*.coffee': 'coffee',
                     'src/**/*.js': ['coverage']
@@ -636,128 +694,85 @@ module.exports = function (grunt) {
                     }
                 },
                 coverageReporter: {
-                    type : 'html',
-                    dir : '<%folders.build%>/coverage/'
-                }
+                    type: 'html',
+                    dir: '<%folders.build%>/coverage/'
+                },
+                files: [
+                    {pattern: '<%= files.vendor.js %>', watched: false},
+                    {pattern: '<%= html2js.app.dest %>', watched: true},
+                    {pattern: '<%= html2js.common.dest %>', watched: true},
+                    {pattern: '<%= files.app.js %>', watched: true},
+                    {pattern: '<%= files.app.coffee %>', watched: true}
+                ]
             },
 
-            watch_unit: {
-                configFile: '<%= folders.build %>/karma.unit.conf.coffee',
-                plugins: [
-                    'karma-mocha',
-                    'karma-chai',
-                    'karma-coverage',
-                    'karma-phantomjs-launcher',
-                    'karma-coffee-preprocessor',
-                    'karma-html2js-preprocessor',
-                    'karma-requirejs'
-                ],
-                //frameworks: ['jasmine'],
-                frameworks: ['mocha','chai'], // mocha only for coffee tests
-                background: true,
-                //browsers: [ 'Chrome'],
-                port: 9001, // server listening on port
-                runnerPort: 9101
+            unit: {
+                port: 9020,// server listening on port
+                files: [
+                    {pattern: 'vendor/ngMidwayTester/Source/ngMidwayTester.js', watched: false},
+                    {pattern: 'node_modules/sinon/pkg/sinon.js', watched: false},
+                    '<%= files.test.midway.js %>',
+                    '<%= files.test.midway.coffee %>'
+                ]
             },
-
-            watch_midway: {
-                configFile: '<%= folders.build %>/karma.midway.conf.coffee',
-                plugins: [
-                    'karma-mocha',
-                    'karma-chai',
-                    'karma-coverage',
-                    'karma-phantomjs-launcher',
-                    'karma-coffee-preprocessor',
-                    'karma-html2js-preprocessor',
-                    'karma-requirejs'
-                ],
-                //frameworks: ['jasmine'],
-                frameworks: ['mocha','chai'], // mocha only for coffee tests
-                background: true,
-                port: 9002, // server listening on port
-                runnerPort: 9102
-            },
-
-//            watch_e2e: {
-//                configFile: '<%= folders.build %>/karma.e2e.conf.coffee',
-//                plugins: [
-//                    'karma-jasmine',
-//                    'karma-ng-scenario',
-//                    'karma-coverage',
-//                    'karma-chrome-launcher',
-//                    'karma-coffee-preprocessor',
-//                    'karma-html2js-preprocessor',
-//                    'karma-requirejs'
-//                ],
-//                frameworks: ['ng-scenario','mocha','chai'],
-//                background: false,
-//                port: 9003, // where karma runs
-//                runnerport: '<%= express.e2e.options.port %>', // where the app runs
-//                urlRoot: '/_karma.e2e_/',
-//                proxies:{ '/': 'http://localhost:<%= karma.watch_e2e.runnerPort %>/'},
-//                browsers: ['Chrome'],
-//                autowatch: true
-//            },
 
             ci_unit: {
-                configFile: '<%= folders.build %>/karma.unit.conf.coffee',
-                plugins: [
-                    'karma-mocha',
-                    'karma-chai',
-                    'karma-coverage',
-                    'karma-phantomjs-launcher',
-                    'karma-coffee-preprocessor',
-                    'karma-html2js-preprocessor',
-                    'karma-requirejs'
+                port: 9020,// server listening on port
+                files: [
+                    {pattern: 'vendor/ngMidwayTester/Source/ngMidwayTester.js', watched: false},
+                    {pattern: 'node_modules/sinon/pkg/sinon.js', watched: false},
+                    '<%= files.test.midway.js %>',
+                    '<%= files.test.midway.coffee %>'
                 ],
-                //frameworks: ['jasmine'],
-                frameworks: ['mocha','chai'], // mocha only for coffee tests
-                port: 9011,
-                runnerPort: 9111,
+                singleRun: true,
+                background: false
+            },
+            midway: {
+                port: 9020,// server listening on port
+                files: [
+                    {pattern: 'vendor/ngMidwayTester/Source/ngMidwayTester.js', watched: false},
+                    {pattern: 'node_modules/sinon/pkg/sinon.js', watched: false},
+                    '<%= files.test.midway.js %>',
+                    '<%= files.test.midway.coffee %>'
+                ]
+            },
+
+            ci_midway: {
+                port: 9020,// server listening on port
+                files: [
+                    {pattern: 'vendor/ngMidwayTester/Source/ngMidwayTester.js', watched: false},
+                    {pattern: 'node_modules/sinon/pkg/sinon.js', watched: false},
+                    '<%= files.test.midway.js %>',
+                    '<%= files.test.midway.coffee %>'
+                ],
                 singleRun: true,
                 background: false
             },
 
-            ci_midway: {
-                configFile: '<%= folders.build %>/karma.midway.conf.coffee',
-                plugins: [
-                    'karma-mocha',
-                    'karma-chai',
-                    'karma-coverage',
-                    'karma-phantomjs-launcher',
-                    'karma-coffee-preprocessor',
-                    'karma-html2js-preprocessor',
-                    'karma-requirejs'
+            e2e: {
+                port: 9030, // server listening on port
+                files: [
+                    {pattern: 'node_modules/protractor/node_modules/selenium-webdriver/index.js', watched: false},
+                    {pattern: 'node_modules/protractor/lib/protractor.js', watched: false},
+                    '<%=folders.test.test %>/functionalTestBase.coffee',
+                    '<%= files.test.e2e.js %>',
+                    '<%= files.test.e2e.coffee %>'
+                ]
+            },
+
+            ci_e2e: {
+                port: 9030, // server listening on port
+                files: [
+                    {pattern: 'node_modules/protractor/node_modules/selenium-webdriver/index.js', watched: false},
+                    {pattern: 'node_modules/protractor/lib/protractor.js', watched: false},
+                    '<%=folders.test.test %>/functionalTestBase.coffee',
+                    '<%= files.test.e2e.js %>',
+                    '<%= files.test.e2e.coffee %>'
                 ],
-                //frameworks: ['jasmine'],
-                frameworks: ['mocha','chai'], // mocha only for coffee tests
-                port: 9012,
-                runnerPort: 9112,
                 singleRun: true,
                 background: false
 
             }
-
-//            ci_e2e: {
-//                configFile: '<%= folders.build %>/karma.e2e.conf.coffee',
-//                plugins: [
-//                    'karma-jasmine',
-//                    'karma-ng-scenario',
-//                    'karma-coverage',
-//                    'karma-chrome-launcher',
-//                    'karma-coffee-preprocessor',
-//                    'karma-html2js-preprocessor',
-//                    'karma-requirejs'
-//                ],
-//                frameworks: ['ng-scenario'],
-//                port: 9013, // where karma runs
-//                runnerPort: '<%= express.e2e.options.port %>', // where the app runs
-//                urlRoot: '/_karma.e2e_/',
-//                proxies:{ '/': 'http://localhost:<%= karma.ci_e2e.runnerPort %>/'},
-//                browsers: ['Chrome'],
-//                singleRun: true,
-//                background: false
-//            }
         },
 
 
@@ -767,9 +782,8 @@ module.exports = function (grunt) {
          */
         karmaconfig: {
             options: {
+                // default application scope files use by all tests.
                 patterns: [
-                    //{pattern: '<%=folders.test.test %>/mocha.conf.coffee', watched: false, served: false},
-                    //{pattern: '<%=folders.test.test %>/chai.helpers.coffee', watched: false, served: false},
                     {pattern: '<%= files.vendor.js %>', watched: false},
                     {pattern: '<%= html2js.app.dest %>', watched: true},
                     {pattern: '<%= html2js.common.dest %>', watched: true},
@@ -782,12 +796,6 @@ module.exports = function (grunt) {
                 template: '<%= folders.config %>/karma.config.tpl.coffee',
                 dest: '<%= folders.build %>/karma.unit.conf.coffee',
                 patterns: [
-                    /*{pattern: '<%= files.vendor.js %>', watched: false},
-                    {pattern: '<%= html2js.app.dest %>', watched: true},
-                    {pattern: '<%= html2js.common.dest %>', watched: true},
-                    {pattern: '<%= files.app.js %>', watched: true},
-                    {pattern: '<%= files.app.coffee %>', watched: true},
-                    */
                     {pattern: 'vendor/angular-mocks/index.js', watched: false},
                     {pattern: 'node_modules/sinon/pkg/sinon.js', watched: false},
 
@@ -800,34 +808,24 @@ module.exports = function (grunt) {
                 template: '<%= folders.config %>/karma.config.tpl.coffee',
                 dest: '<%= folders.build %>/karma.midway.conf.coffee',
                 patterns: [
-                    {pattern: '<%= files.vendor.js %>', watched: false},
-                    {pattern: '<%= html2js.app.dest %>', watched: false},
-                    {pattern: '<%= html2js.common.dest %>', watched: false},
-                    {pattern: '<%= files.app.js %>', watched: true},
-                    {pattern: '<%= files.app.coffee %>', watched: true},
-
                     {pattern: 'vendor/ngMidwayTester/Source/ngMidwayTester.js', watched: false},
                     {pattern: 'node_modules/sinon/pkg/sinon.js', watched: false},
-
                     {pattern: '<%= files.test.midway.js %>', watched: true},
                     {pattern: '<%= files.test.midway.coffee %>', watched: true}
                 ]
-            }
+            },
 
-//            e2e: {
-//                template: '<%= folders.config %>/karma.config.tpl.coffee',
-//                dest: '<%= folders.build %>/karma.e2e.conf.coffee',
-//                patterns: [
-//                   /* {pattern: '<%= files.vendor.js %>', watched: false},
-//                    {pattern: '<%= html2js.app.dest %>', watched: false},
-//                    {pattern: '<%= html2js.common.dest %>', watched: false},
-//                    {pattern: '<%= files.app.js %>', watched: true},
-//                    {pattern: '<%= files.app.coffee %>', watched: true},
-//                    */
-//                    {pattern: '<%= files.test.e2e.js %>', watched: true},
-//                    {pattern: '<%= files.test.e2e.coffee %>', watched: true}
-//                ]
-//            }
+            e2e: {
+                template: '<%= folders.config %>/karma.config.tpl.coffee',
+                dest: '<%= folders.build %>/karma.e2e.conf.coffee',
+                patterns: [
+                    {pattern: 'node_modules/protractor/node_modules/selenium-webdriver/index.js', watched: false},
+                    {pattern: 'node_modules/protractor/lib/protractor.js', watched: false},
+                    {pattern: '<%=folders.test.test %>/functionalTestBase.coffee', watched: true},
+                    {pattern: '<%= files.test.e2e.js %>', watched: true},
+                    {pattern: '<%= files.test.e2e.coffee %>', watched: true}
+                ]
+            }
         },
 
         /**
@@ -876,7 +874,7 @@ module.exports = function (grunt) {
              * When the build.conf.js changes, we just want to lint it. In fact, when
              */
             buildconf: {
-                files: [ '<%= folders.config %>/build.config.js' ] ,
+                files: [ '<%= folders.config %>/build.config.js' ],
                 tasks: ['jshint:buildconf'],
                 options: { livereload: false }
             },
@@ -888,10 +886,10 @@ module.exports = function (grunt) {
             jssrc: {
                 files: [ '<%= files.app.js %>' ],
                 tasks: ['jshint:src',
-                        'karma:watch_unit:run',
-                        'karma:watch_midway:run',
-                        //'karma:watch_e2e:run',
-                        'copy:build_appjs'
+                    'karma:unit:run',
+                    'karma:midway:run',
+                    //'karma:e2e:run',
+                    'copy:build_appjs'
                 ]
             },
 
@@ -902,11 +900,11 @@ module.exports = function (grunt) {
             coffeesrc: {
                 files: ['<%= files.app.coffee %>'],
                 tasks: [ 'coffeelint:src',
-                         'coffee:source',
-                         'karma:watch_unit:run',
-                         'karma:watch_midway:run',
-                         //'karma:watch_e2e:run',
-                         'copy:build_appjs'
+                    'coffee:source',
+                    'karma:unit:run',
+                    'karma:midway:run',
+                    //'karma:e2e:run',
+                    'copy:build_appjs'
                 ]
             },
 
@@ -952,19 +950,19 @@ module.exports = function (grunt) {
              */
             jsunit: {
                 files: [ '<%= files.test.unit.js %>' ],
-                tasks: [ 'jshint:test', 'karma:watch_unit:run' ],
+                tasks: [ 'jshint:test', 'karma:unit:run' ],
                 options: { livereload: false }
             },
 
             jsmidway: {
                 files: [ '<%= files.test.midway.js %>' ],
-                tasks: [ 'jshint:test', 'karma:watch_midway:run' ],
+                tasks: [ 'jshint:test', 'karma:midway:run' ],
                 options: { livereload: false }
             },
 
             jse2e: {
                 files: [ '<%= files.test.e2e.js %>' ],
-                tasks: [ 'jshint:test'], //, 'karma:watch_e2e:run' ],
+                tasks: [ 'jshint:test'], //, 'karma:e2e:run' ],
                 options: { livereload: false }
             },
 
@@ -974,19 +972,19 @@ module.exports = function (grunt) {
              */
             coffeeunit: {
                 files: [ '<%= files.test.unit.coffee %>' ],
-                tasks: [ 'coffeelint:test', 'karma:watch_unit:run' ],
+                tasks: [ 'coffeelint:test', 'karma:unit:run' ],
                 options: { livereload: false }
             },
 
             coffeemidway: {
                 files: [ '<%= files.test.midway.coffee %>' ],
-                tasks: [ 'coffeelint:test', 'karma:watch_midway:run' ],
+                tasks: [ 'coffeelint:test', 'karma:midway:run' ],
                 options: { livereload: false }
             },
 
             coffeee2e: {
                 files: [ '<%= files.test.e2e.coffee %>' ],
-                tasks: [ 'coffeelint:test'],//, 'karma:watch_e2e:run' ],
+                tasks: [ 'coffeelint:test'],//, 'karma:e2e:run' ],
                 options: { livereload: false }
             }
         },
@@ -1019,26 +1017,26 @@ module.exports = function (grunt) {
     grunt.renameTask('watch', 'delta');
 
 
-    grunt.registerTask('dev_server', function(){
+    grunt.registerTask('dev_server', function () {
         grunt.task.run([ 'open', 'express:livereload', 'express-keepalive']);
     });
 
     /*
-    The test servers stay in process as long as the grunt process is running.
-    When running with the 'grunt-watch' (renamed 'delta') this holds the grunt process alive forever.
-    The build target executes the 'ci' versions of the karma tests, this means they are scheduled for a single run only,
-    although the servers are held in processes until the watch process completes.
-    This effectively blocks the tests from running a subsequent time when any files change.
-    To solve this you MUST run build separately from
+     The test servers stay in process as long as the grunt process is running.
+     When running with the 'grunt-watch' (renamed 'delta') this holds the grunt process alive forever.
+     The build target executes the 'ci' versions of the karma tests, this means they are scheduled for a single run only,
+     although the servers are held in processes until the watch process completes.
+     This effectively blocks the tests from running a subsequent time when any files change.
+     To solve this you MUST run build separately from
      */
     grunt.registerTask('watch', function () {
         grunt.task.run([
             'build',
             'shell:kill_phantom',
-            'karma:watch_unit',            // single_run = false
-            'karma:watch_midway',          // single_run = false
+            'karma:unit',            // single_run = false
+            'karma:midway',          // single_run = false
             //'express:e2e',  // to serve app to e2e tests
-            //'karma:watch_e2e',             // acceptance tests
+            //'karma:e2e',             // acceptance tests
             //'express:livereload',    // allow dev to see ui changes live
             'delta'                  // watch for file changes and trigger build events
         ]);
@@ -1047,8 +1045,8 @@ module.exports = function (grunt) {
     /**
      * The `build` task gets your app ready to run for development and testing.
      */
-//    grunt.registerTask('watch_e2e', function () {
-//        grunt.task.run([ 'express:e2e', 'karma:watch_e2e' ]);
+//    grunt.registerTask('e2e', function () {
+//        grunt.task.run([ 'express:e2e', 'karma:e2e' ]);
 //    });
 
 
@@ -1057,13 +1055,24 @@ module.exports = function (grunt) {
      */
     grunt.registerTask('default', function () {
         //grunt.task.requires('build');
-        grunt.task.run(['init', 'build', 'test', 'compile']);
+        grunt.task.run(['init', 'build', 'karma:ci_unit', 'karma:ci_midway', 'compile']);
     });
 
-    grunt.registerTask('init', 'install bower components if not already installed', function() {
-        if(!grunt.file.isDir(grunt.config('folders.vendor'))) {
+    grunt.registerTask('init', 'install bower components if not already installed', function () {
+        if (!grunt.file.isDir(grunt.config('folders.vendor'))) {
             grunt.task.run('bower');
         }
+        if (!grunt.file.isDir('./selenium')) {
+            grunt.task.run('shell:install_selenium');
+        }
+    });
+
+    grunt.registerTask('test', function () {
+        grunt.task.run([ 'reset', 'karma:ci_unit', 'karma:ci_midway' ]);
+    });
+
+    grunt.registerTask('reset', function () {
+        grunt.task.run([ 'shell:kill_phantom' ]);
     });
 
     /**
@@ -1073,60 +1082,41 @@ module.exports = function (grunt) {
         grunt.task.run([ 'quick-build', 'assemble' ]);
     });
 
-
     /**
      * quick-build task which gets executed by travis. We have to decouple this one
      * from build task, because travis ci can't handle less etc.
      */
-    grunt.registerTask('quick-build', function () {
-        grunt.task.run([
-            'clean',
-            'html2js',
-            'jshint',
-            'coffeelint',
-            'coffee',
-            'karmaconfig'
-        ]);
-    });
+    grunt.registerTask('quick-build', [
+        'clean',
+        'html2js',
+        'jshint',
+        'coffeelint',
+        'coffee',
+        'karmaconfig'
+    ]);
 
-    grunt.registerTask('assemble', function() {
-        grunt.task.requires('quick-build');
-        grunt.task.run([
-            'recess:build',
-            'copy:build_assets',
-            'copy:build_appjs',
-            'copy:build_vendorjs',
-            'copy:build_vendorcss', // ??
-            'index:build'
-        ]);
-    });
-
-    grunt.registerTask('test', function() {
-        grunt.task.requires('quick-build');
-        grunt.task.run([
-            'karma:ci_unit',
-            'karma:ci_midway'//,
-            //'express:e2e',
-            //'karma:ci_e2e'
-        ]);
-    });
+    grunt.registerTask('assemble', [
+        'recess:build',
+        'copy:build_assets',
+        'copy:build_appjs',
+        'copy:build_vendorjs',
+        'copy:build_vendorcss', // ??
+        'index:build'
+    ]);
 
 
     /**
      * The `compile` task gets your app ready for deployment by concatenating and
      * minifying your code.
      */
-    grunt.registerTask('compile', function () {
-        grunt.task.requires('build');
-        grunt.task.run([
-            'recess:compile',
-            'copy:compile_assets',
-            'ngmin',
-            'concat:compile_js',
-            'uglify',
-            'index:compile'
-        ]);
-    });
+    grunt.registerTask('compile', [
+        'recess:compile',
+        'copy:compile_assets',
+        'ngmin',
+        'concat:compile_js',
+        'uglify',
+        'index:compile'
+    ]);
 
     grunt.registerTask('release', function () {
         //grunt.task.requires('build');
@@ -1219,13 +1209,13 @@ module.exports = function (grunt) {
         //console.log("karma combined patterns: \n",patterns);
 
         var files = [];
-        patterns.forEach( function(item){
+        patterns.forEach(function (item) {
             /**
              * @attribute: watched, @type: boolean, @default: true
              * @description: If karma autoWatch is true all files that have set watched
              * to true will be watched for changes.
-            **/
-            var watched = item.watched === undefined ? true: item.watched;
+             **/
+            var watched = item.watched === undefined ? true : item.watched;
             /**
              * @attribute: served, @type: boolean, @default: true
              * @description: Should the files be served by Karma's webserver?
@@ -1235,18 +1225,24 @@ module.exports = function (grunt) {
              * @attribute: included, @type: Boolean, @default:  true
              * @description: Should the files be included in the browser using <script> tag?
              * Use false if you wanna load them manually, eg. using Require.js.
-            **/
+             **/
             var included = item.included === undefined ? true : item.included;
             // get the list of files for this pattern
             //console.log('get list for [',item.pattern,']');
             var list = grunt.file.expand(item.pattern);
             //console.log('files: [', list, ']');
 
-            list.forEach(function(file) {
-                var obj = {pattern:  '' + file + ''};
-                if (!watched) { obj.watched = false;}
-                if (!served) { obj.watched = false;}
-                if (!included) { obj.included = false;}
+            list.forEach(function (file) {
+                var obj = {pattern: '' + file + ''};
+                if (!watched) {
+                    obj.watched = false;
+                }
+                if (!served) {
+                    obj.watched = false;
+                }
+                if (!included) {
+                    obj.included = false;
+                }
                 //console.log("add pattern: ", obj);
                 files.push(obj);
             });
@@ -1261,6 +1257,12 @@ module.exports = function (grunt) {
                 });
             }
         });
+    });
+
+
+    grunt.registerMultiTask('protractor', 'execute functional tests using mocha with protractor library', function () {
+        console.log('protractor coming soon');
+
     });
 
 

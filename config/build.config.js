@@ -41,8 +41,18 @@ module.exports = {
      */
     files: {
         app: {
-            js:     ['<%= folders.src %>/**/*.js',     '!<%= folders.src %>/**/*.spec.js',     '!<%= folders.src %>/**/*.scenario.js'],
-            coffee: ['<%= folders.src %>/**/*.coffee', '!<%= folders.src %>/**/*.spec.coffee', '!<%= folders.src %>/**/*.scenario.coffee']
+            js: [
+                '<%= folders.src %>/**/*.js',
+                '!<%= folders.src %>/**/*.spec.js',
+                '!<%= folders.src %>/**/*.scenario.js',
+                '!<%= folders.test.test %>/**/*.js'
+            ],
+            coffee: [
+                '<%= folders.src %>/**/*.coffee',
+                '!<%= folders.src %>/**/*.spec.coffee',
+                '!<%= folders.src %>/**/*.scenario.coffee',
+                '!<%= folders.test.test %>/**/*.coffee'
+            ]
         },
         test: {
             unit: {
@@ -88,7 +98,7 @@ module.exports = {
                 '<%= folders.vendor %>/angular-resource/index.js',
                 '<%= folders.vendor %>/angular-placeholders/angular-placeholders.js',
                 '<%= folders.vendor %>/angular-ui-router/release/angular-ui-router.js',
-                '<%= folders.vendor %>/angular-ui-utils/modules/route.js',
+                '<%= folders.vendor %>/angular-ui-utils/modules/route/route.js',
 
                 /* with angular-boostrap, do we need bootstrap-less ? */
                 '<%= folders.vendor %>/angular-bootstrap/ui-bootstrap-tpls.min.js'
