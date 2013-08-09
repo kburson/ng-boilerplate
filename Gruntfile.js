@@ -10,11 +10,11 @@ module.exports = function (grunt) {
      */
     var userConfig = require('./config/build.config.js');
 
-
-    /**
-     * This is the configuration object Grunt uses to give each plugin its
-     * instructions.
-     */
+    /*************************************************************
+     *
+     * This is the configuration object Grunt uses to give each plugin its instructions.
+     *
+     *************************************************************/
     var taskConfig = {
 
         /**
@@ -599,31 +599,43 @@ module.exports = function (grunt) {
         },
 
 
-        test: {
+        tests: {
+            common: {
+                files: [
+                    {pattern: '<%= files.vendor.js %>', watched: false},
+                    {pattern: '<%= html2js.app.dest %>', watched: true},
+                    {pattern: '<%= html2js.common.dest %>', watched: true},
+                    {pattern: '<%= files.app.js %>', watched: true},
+                    {pattern: '<%= files.app.coffee %>', watched: true}
+                ]
+            },
             unit: {
                 port: 9010,
-                files: {
-                    src: [
-                        {pattern: 'vendor/angular-mocks/index.js', watched: false},
-                        {pattern: 'node_modules/sinon/pkg/sinon.js', watched: false},
-                        '<%= files.test.unit.js %>',
-                        '<%= files.test.unit.coffee %>'
-                    ]
-                }
+                files: [
+                    {pattern: 'vendor/angular-mocks/index.js', watched: false},
+                    {pattern: 'node_modules/sinon/pkg/sinon.js', watched: false},
+                    '<%= files.test.unit.js %>',
+                    '<%= files.test.unit.coffee %>'
+                ]
             },
             midway: {
                 port: 9020,
-                files: {
-                    src: [
-                        {pattern: 'vendor/ngMidwayTester/Source/ngMidwayTester.js', watched: false},
-                        {pattern: 'node_modules/sinon/pkg/sinon.js', watched: false},
-                        '<%= files.test.midway.js %>',
-                        '<%= files.test.midway.coffee %>'
-                    ]
-                }
+                files: [
+                    {pattern: 'vendor/ngMidwayTester/Source/ngMidwayTester.js', watched: false},
+                    {pattern: 'node_modules/sinon/pkg/sinon.js', watched: false},
+                    '<%= files.test.midway.js %>',
+                    '<%= files.test.midway.coffee %>'
+                ]
             },
             e2e: {
-
+                port: 9030, // server listening on port
+                files: [
+                    {pattern: 'node_modules/protractor/node_modules/selenium-webdriver/index.js', watched: false},
+                    {pattern: 'node_modules/protractor/lib/protractor.js', watched: false},
+                    '<%=folders.test.test %>/functionalTestBase.coffee',
+                    '<%= files.test.e2e.js %>',
+                    '<%= files.test.e2e.coffee %>'
+                ]
             }
         },
 
@@ -697,78 +709,41 @@ module.exports = function (grunt) {
                     type: 'html',
                     dir: '<%folders.build%>/coverage/'
                 },
-                files: [
-                    {pattern: '<%= files.vendor.js %>', watched: false},
-                    {pattern: '<%= html2js.app.dest %>', watched: true},
-                    {pattern: '<%= html2js.common.dest %>', watched: true},
-                    {pattern: '<%= files.app.js %>', watched: true},
-                    {pattern: '<%= files.app.coffee %>', watched: true}
-                ]
+                files: '<%= tests.common.files %>'
             },
 
             unit: {
-                port: 9020,// server listening on port
-                files: [
-                    {pattern: 'vendor/ngMidwayTester/Source/ngMidwayTester.js', watched: false},
-                    {pattern: 'node_modules/sinon/pkg/sinon.js', watched: false},
-                    '<%= files.test.midway.js %>',
-                    '<%= files.test.midway.coffee %>'
-                ]
+                port: '<%= tests.unit.port %>',// server listening on port
+                files: '<%= tests.unit.files %>'
             },
 
             ci_unit: {
-                port: 9020,// server listening on port
-                files: [
-                    {pattern: 'vendor/ngMidwayTester/Source/ngMidwayTester.js', watched: false},
-                    {pattern: 'node_modules/sinon/pkg/sinon.js', watched: false},
-                    '<%= files.test.midway.js %>',
-                    '<%= files.test.midway.coffee %>'
-                ],
+                port: '<%= tests.unit.port %>',// server listening on port
+                files: '<%= tests.unit.files %>',
                 singleRun: true,
                 background: false
             },
+
             midway: {
-                port: 9020,// server listening on port
-                files: [
-                    {pattern: 'vendor/ngMidwayTester/Source/ngMidwayTester.js', watched: false},
-                    {pattern: 'node_modules/sinon/pkg/sinon.js', watched: false},
-                    '<%= files.test.midway.js %>',
-                    '<%= files.test.midway.coffee %>'
-                ]
+                port: '<%= tests.midway.port %>',// server listening on port
+                files: '<%= tests.midway.files %>'
             },
 
             ci_midway: {
-                port: 9020,// server listening on port
-                files: [
-                    {pattern: 'vendor/ngMidwayTester/Source/ngMidwayTester.js', watched: false},
-                    {pattern: 'node_modules/sinon/pkg/sinon.js', watched: false},
-                    '<%= files.test.midway.js %>',
-                    '<%= files.test.midway.coffee %>'
-                ],
+                port: '<%= tests.midway.port %>',// server listening on port
+                files: '<%= tests.midway.files %>',
                 singleRun: true,
                 background: false
             },
 
             e2e: {
-                port: 9030, // server listening on port
-                files: [
-                    {pattern: 'node_modules/protractor/node_modules/selenium-webdriver/index.js', watched: false},
-                    {pattern: 'node_modules/protractor/lib/protractor.js', watched: false},
-                    '<%=folders.test.test %>/functionalTestBase.coffee',
-                    '<%= files.test.e2e.js %>',
-                    '<%= files.test.e2e.coffee %>'
-                ]
+                port: '<%= tests.e2e.port %>',// server listening on port
+                files: '<%= tests.e2e.files %>'
             },
 
             ci_e2e: {
-                port: 9030, // server listening on port
-                files: [
-                    {pattern: 'node_modules/protractor/node_modules/selenium-webdriver/index.js', watched: false},
-                    {pattern: 'node_modules/protractor/lib/protractor.js', watched: false},
-                    '<%=folders.test.test %>/functionalTestBase.coffee',
-                    '<%= files.test.e2e.js %>',
-                    '<%= files.test.e2e.coffee %>'
-                ],
+                port: '<%= tests.e2e.port %>',// server listening on port
+                files: '<%= tests.e2e.files %>',
                 singleRun: true,
                 background: false
 
@@ -783,48 +758,26 @@ module.exports = function (grunt) {
         karmaconfig: {
             options: {
                 // default application scope files use by all tests.
-                patterns: [
-                    {pattern: '<%= files.vendor.js %>', watched: false},
-                    {pattern: '<%= html2js.app.dest %>', watched: true},
-                    {pattern: '<%= html2js.common.dest %>', watched: true},
-                    {pattern: '<%= files.app.js %>', watched: true},
-                    {pattern: '<%= files.app.coffee %>', watched: true}
-                ]
+                patterns: '<%= karma.options.files %>'
             },
 
             unit: {
                 template: '<%= folders.config %>/karma.config.tpl.coffee',
                 dest: '<%= folders.build %>/karma.unit.conf.coffee',
-                patterns: [
-                    {pattern: 'vendor/angular-mocks/index.js', watched: false},
-                    {pattern: 'node_modules/sinon/pkg/sinon.js', watched: false},
-
-                    {pattern: '<%= files.test.unit.js %>', watched: true},
-                    {pattern: '<%= files.test.unit.coffee %>', watched: true}
-                ]
+                patterns: '<%= karma.unit.files %>'
             },
 
             midway: {
                 template: '<%= folders.config %>/karma.config.tpl.coffee',
                 dest: '<%= folders.build %>/karma.midway.conf.coffee',
-                patterns: [
-                    {pattern: 'vendor/ngMidwayTester/Source/ngMidwayTester.js', watched: false},
-                    {pattern: 'node_modules/sinon/pkg/sinon.js', watched: false},
-                    {pattern: '<%= files.test.midway.js %>', watched: true},
-                    {pattern: '<%= files.test.midway.coffee %>', watched: true}
-                ]
+                patterns: '<%= karma.midway.files %>'
+
             },
 
             e2e: {
                 template: '<%= folders.config %>/karma.config.tpl.coffee',
                 dest: '<%= folders.build %>/karma.e2e.conf.coffee',
-                patterns: [
-                    {pattern: 'node_modules/protractor/node_modules/selenium-webdriver/index.js', watched: false},
-                    {pattern: 'node_modules/protractor/lib/protractor.js', watched: false},
-                    {pattern: '<%=folders.test.test %>/functionalTestBase.coffee', watched: true},
-                    {pattern: '<%= files.test.e2e.js %>', watched: true},
-                    {pattern: '<%= files.test.e2e.coffee %>', watched: true}
-                ]
+                patterns: '<%= karma.e2e.files %>'
             }
         },
 
@@ -998,14 +951,20 @@ module.exports = function (grunt) {
         }
     };
 
-    /**
+
+    /*************************************************************
      * Load required Grunt tasks. These are installed based on the versions listed
      * in `package.json` when you do `npm install --save-dev` in this directory.
-     */
+     *************************************************************/
     require('matchdep').filterDev('grunt-*').forEach(grunt.loadNpmTasks);
 
     grunt.initConfig(grunt.util._.merge(taskConfig, userConfig));
 
+    /*************************************************************
+     *
+     * DEFINE CUSTOM TASKS
+     *
+     *************************************************************/
 
     /**
      * In order to make it safe to just compile or copy *only* what was changed,
@@ -1065,6 +1024,7 @@ module.exports = function (grunt) {
         if (!grunt.file.isDir('./selenium')) {
             grunt.task.run('shell:install_selenium');
         }
+        //grunt.task.run('karmaconfig');
     });
 
     grunt.registerTask('test', function () {
@@ -1091,8 +1051,7 @@ module.exports = function (grunt) {
         'html2js',
         'jshint',
         'coffeelint',
-        'coffee',
-        'karmaconfig'
+        'coffee'
     ]);
 
     grunt.registerTask('assemble', [
@@ -1196,56 +1155,58 @@ module.exports = function (grunt) {
      */
     grunt.registerMultiTask('karmaconfig', 'Process karma config templates', function () {
 
-        //console.log("karma config: \n",this);
-
         var patterns = this.data.patterns;
-        //console.log("karma target patterns: \n",patterns);
 
         var options = this.options();
-        //console.log("karma config options: \n",options);
         if (options !== undefined && options.patterns !== undefined) {
             patterns = options.patterns.concat(patterns);
         }
-        //console.log("karma combined patterns: \n",patterns);
 
         var files = [];
         patterns.forEach(function (item) {
-            /**
-             * @attribute: watched, @type: boolean, @default: true
-             * @description: If karma autoWatch is true all files that have set watched
-             * to true will be watched for changes.
-             **/
-            var watched = item.watched === undefined ? true : item.watched;
-            /**
-             * @attribute: served, @type: boolean, @default: true
-             * @description: Should the files be served by Karma's webserver?
-             */
-            var served = item.served === undefined ? true : item.served;
-            /**
-             * @attribute: included, @type: Boolean, @default:  true
-             * @description: Should the files be included in the browser using <script> tag?
-             * Use false if you wanna load them manually, eg. using Require.js.
-             **/
-            var included = item.included === undefined ? true : item.included;
-            // get the list of files for this pattern
-            //console.log('get list for [',item.pattern,']');
-            var list = grunt.file.expand(item.pattern);
-            //console.log('files: [', list, ']');
+            if (item.pattern === undefined) {
+                var patterns = grunt.file.expand(item);
+                if (!grunt.util._.isArray(patterns)) {
+                    patterns = [patterns];
+                }
+                patterns.forEach(function (it) {
+                    files.push(it);
+                });
+            } else {
 
-            list.forEach(function (file) {
-                var obj = {pattern: '' + file + ''};
-                if (!watched) {
-                    obj.watched = false;
-                }
-                if (!served) {
-                    obj.watched = false;
-                }
-                if (!included) {
-                    obj.included = false;
-                }
-                //console.log("add pattern: ", obj);
-                files.push(obj);
-            });
+                /**
+                 * @attribute: watched, @type: boolean, @default: true
+                 * @description: If karma autoWatch is true all files that have set watched
+                 * to true will be watched for changes.
+                 **/
+                var watched = item.watched === undefined ? true : item.watched;
+                /**
+                 * @attribute: served, @type: boolean, @default: true
+                 * @description: Should the files be served by Karma's webserver?
+                 */
+                var served = item.served === undefined ? true : item.served;
+                /**
+                 * @attribute: included, @type: Boolean, @default:  true
+                 * @description: Should the files be included in the browser using <script> tag?
+                 * Use false if you wanna load them manually, eg. using Require.js.
+                 **/
+                var included = item.included === undefined ? true : item.included;
+
+                var list = grunt.file.expand(item.pattern);
+                list.forEach(function (file) {
+                    var obj = {pattern: '' + file + ''};
+                    if (!watched) {
+                        obj.watched = false;
+                    }
+                    if (!served) {
+                        obj.watched = false;
+                    }
+                    if (!included) {
+                        obj.included = false;
+                    }
+                    files.push(obj);
+                });
+            }
         });
         grunt.file.copy(this.data.template, this.data.dest, {
             process: function (contents) {
@@ -1262,6 +1223,8 @@ module.exports = function (grunt) {
 
     grunt.registerMultiTask('protractor', 'execute functional tests using mocha with protractor library', function () {
         console.log('protractor coming soon');
+        // start and stop web driver
+        //execute
 
     });
 
