@@ -1,7 +1,13 @@
 'use strict';
 /* jslint camelcase: false */
 
-var path = require('path');
+//var path = require('path');
+//var fs = require('fs');
+//var glob = require('glob');
+//var Minimatch = require("minimatch").Minimatch;
+
+//var remote = require('./node_modules/protractor/node_modules/selenium-webdriver/remote');
+
 
 module.exports = function (grunt) {
 
@@ -10,11 +16,25 @@ module.exports = function (grunt) {
      */
     var userConfig = require('./config/build.config.js');
 
-    /*************************************************************
+    /**
+     * Load user custom grunt task definitions
+     */
+
+    //var userTasks = require('<%= folders.config %>/build.tasks.js');
+    grunt.file.expand('./config/**/*.task.js').forEach(
+        function(file){
+            require(file)(grunt);
+            file = file.substring(file.lastIndexOf('/')+1, file.indexOf('.task.js'));
+            grunt.verbose.writeln('\x1b[33m============= \x1b[36mLoaded custom grunt task \x1b[0m[\x1b[32;1m' + file + '\x1b[0m]');
+        }
+    );
+
+
+    /******************************************************************************
      *
      * This is the configuration object Grunt uses to give each plugin its instructions.
      *
-     *************************************************************/
+     ******************************************************************************/
     var taskConfig = {
 
         /**
@@ -952,19 +972,19 @@ module.exports = function (grunt) {
     };
 
 
-    /*************************************************************
+    /******************************************************************************
      * Load required Grunt tasks. These are installed based on the versions listed
      * in `package.json` when you do `npm install --save-dev` in this directory.
-     *************************************************************/
+     ******************************************************************************/
     require('matchdep').filterDev('grunt-*').forEach(grunt.loadNpmTasks);
 
     grunt.initConfig(grunt.util._.merge(taskConfig, userConfig));
 
-    /*************************************************************
+    /******************************************************************************
      *
-     * DEFINE CUSTOM TASKS
+     * DEFINE TASK ALIASES (groups of tasks run together under an alias target)
      *
-     *************************************************************/
+     ******************************************************************************/
 
     /**
      * In order to make it safe to just compile or copy *only* what was changed,
@@ -976,9 +996,6 @@ module.exports = function (grunt) {
     grunt.renameTask('watch', 'delta');
 
 
-    grunt.registerTask('dev_server', function () {
-        grunt.task.run([ 'open', 'express:livereload', 'express-keepalive']);
-    });
 
     /*
      The test servers stay in process as long as the grunt process is running.
@@ -1012,238 +1029,37 @@ module.exports = function (grunt) {
     /**
      * The default task is to build and compile.
      */
-    grunt.registerTask('default', function () {
-        //grunt.task.requires('build');
-        grunt.task.run(['init', 'build', 'karma:ci_unit', 'karma:ci_midway', 'compile']);
-    });
+    grunt.registerTask('default', ['init', 'build', 'karma:ci_unit', 'karma:ci_midway', 'compile']);
 
-    grunt.registerTask('init', 'install bower components if not already installed', function () {
-        if (!grunt.file.isDir(grunt.config('folders.vendor'))) {
-            grunt.task.run('bower');
-        }
-        if (!grunt.file.isDir('./selenium')) {
-            grunt.task.run('shell:install_selenium');
-        }
-        //grunt.task.run('karmaconfig');
-    });
+    grunt.registerTask('test', [ 'reset', 'karma:ci_unit', 'karma:ci_midway' ]);
 
-    grunt.registerTask('test', function () {
-        grunt.task.run([ 'reset', 'karma:ci_unit', 'karma:ci_midway' ]);
-    });
+    grunt.registerTask('dev_server', [ 'open', 'express:livereload', 'express-keepalive']);
 
-    grunt.registerTask('reset', function () {
-        grunt.task.run([ 'shell:kill_phantom' ]);
-    });
+    grunt.registerTask('reset', [ 'shell:kill_phantom' ]);
 
-    /**
-     * The `build` task gets your app ready to run for development and testing.
-     */
-    grunt.registerTask('build', function () {
-        grunt.task.run([ 'quick-build', 'assemble' ]);
-    });
+    //The `build` task gets your app ready to run for development and testing.
+    grunt.registerTask('build', [ 'quick-build', 'assemble' ]);
 
     /**
      * quick-build task which gets executed by travis. We have to decouple this one
      * from build task, because travis ci can't handle less etc.
      */
-    grunt.registerTask('quick-build', [
-        'clean',
-        'html2js',
-        'jshint',
-        'coffeelint',
-        'coffee'
-    ]);
+    grunt.registerTask('quick-build', ['clean','html2js','jshint','coffeelint','coffee']);
 
-    grunt.registerTask('assemble', [
-        'recess:build',
-        'copy:build_assets',
-        'copy:build_appjs',
-        'copy:build_vendorjs',
+    grunt.registerTask('assemble',['recess:build','copy:build_assets','copy:build_appjs','copy:build_vendorjs',
         'copy:build_vendorcss', // ??
         'index:build'
     ]);
-
 
     /**
      * The `compile` task gets your app ready for deployment by concatenating and
      * minifying your code.
      */
-    grunt.registerTask('compile', [
-        'recess:compile',
-        'copy:compile_assets',
-        'ngmin',
-        'concat:compile_js',
-        'uglify',
-        'index:compile'
+    grunt.registerTask('compile',['recess:compile','copy:compile_assets','ngmin','concat:compile_js',
+        'uglify','index:compile'
     ]);
 
-    grunt.registerTask('release', function () {
-        //grunt.task.requires('build');
-        grunt.task.run(['changelog']);
-    });
+    grunt.registerTask('release', ['changelog']);
 
 
-    /**
-     * A utility function to get all app JavaScript sources.
-     */
-    function filterForJS(srcFiles) {
-        return srcFiles.filter(function (file) {
-            return file.match(/\.js$/);
-        });
-    }
-
-    /**
-     * A utility function to get all app JavaScript sources.
-     */
-    function filterForCoffee(srcFiles) {
-        return srcFiles.filter(function (file) {
-            return file.match(/\.coffee$/);
-        });
-    }
-
-    /**
-     * A utility function to get all app CSS sources.
-     */
-    function filterForCSS(srcFiles) {
-        return srcFiles.filter(function (file) {
-            return file.match(/\.css$/);
-        });
-    }
-
-
-    /**
-     * The index.html template includes the stylesheet and javascript sources
-     * based on dynamic names calculated in this Gruntfile. This task assembles
-     * the list into variables for the template to use and then runs the
-     * compilation.
-     */
-    grunt.registerMultiTask('index', 'Process index.html template', function () {
-
-        var dirRegEx = new RegExp('^(' + grunt.config('folders.build') + '|' + grunt.config('folders.compile') + ')\/', 'g');
-
-        var jsFiles = filterForJS(this.filesSrc).map(function (file) {
-            return file.replace(dirRegEx, '');
-        });
-
-        var cssFiles = filterForCSS(this.filesSrc).map(function (file) {
-            return file.replace(dirRegEx, '');
-        });
-
-        var coffeeFiles = filterForCoffee(this.filesSrc).map(function (file) {
-            return file.replace(dirRegEx, '');
-        });
-        console.log('coffee files for index?: \n', coffeeFiles);
-
-        grunt.file.copy(grunt.config('folders.src') + '/index.html', this.data.dest + '/index.html', {
-            process: function (contents) {
-                return grunt.template.process(contents, {
-                    data: {
-                        scripts: jsFiles,
-                        styles: cssFiles,
-                        version: grunt.config('pkg.version')
-                    }
-                });
-            }
-        });
-    });
-
-
-    /**
-     * In order to avoid having to specify manually the files needed for karma to run,
-     * we use grunt to manage the list for us.
-     * The `karma/*` files are compiled as grunt templates for use by Karma. Yay!
-     */
-    grunt.registerMultiTask('karmaconfig', 'Process karma config templates', function () {
-
-        var patterns = this.data.patterns;
-
-        var options = this.options();
-        if (options !== undefined && options.patterns !== undefined) {
-            patterns = options.patterns.concat(patterns);
-        }
-
-        var files = [];
-        patterns.forEach(function (item) {
-            if (item.pattern === undefined) {
-                var patterns = grunt.file.expand(item);
-                if (!grunt.util._.isArray(patterns)) {
-                    patterns = [patterns];
-                }
-                patterns.forEach(function (it) {
-                    files.push(it);
-                });
-            } else {
-
-                /**
-                 * @attribute: watched, @type: boolean, @default: true
-                 * @description: If karma autoWatch is true all files that have set watched
-                 * to true will be watched for changes.
-                 **/
-                var watched = item.watched === undefined ? true : item.watched;
-                /**
-                 * @attribute: served, @type: boolean, @default: true
-                 * @description: Should the files be served by Karma's webserver?
-                 */
-                var served = item.served === undefined ? true : item.served;
-                /**
-                 * @attribute: included, @type: Boolean, @default:  true
-                 * @description: Should the files be included in the browser using <script> tag?
-                 * Use false if you wanna load them manually, eg. using Require.js.
-                 **/
-                var included = item.included === undefined ? true : item.included;
-
-                var list = grunt.file.expand(item.pattern);
-                list.forEach(function (file) {
-                    var obj = {pattern: '' + file + ''};
-                    if (!watched) {
-                        obj.watched = false;
-                    }
-                    if (!served) {
-                        obj.watched = false;
-                    }
-                    if (!included) {
-                        obj.included = false;
-                    }
-                    files.push(obj);
-                });
-            }
-        });
-        grunt.file.copy(this.data.template, this.data.dest, {
-            process: function (contents) {
-                //console.log("\n-------------\ncontents:\n", contents,"\n--------------\n")
-                return grunt.template.process(contents, {
-                    data: {
-                        patterns: files
-                    }
-                });
-            }
-        });
-    });
-
-
-    grunt.registerMultiTask('protractor', 'execute functional tests using mocha with protractor library', function () {
-        console.log('protractor coming soon');
-        // start and stop web driver
-        //execute
-
-    });
-
-
-    // NOTES: These are experimental only to help me learn the grunt universe
-    grunt.registerTask('print', function (grunt) {
-        //console.log("this.data.*:", this.data);
-        //console.log("print config:\n",userConfig,"\n\n");
-        //console.log('print grunt: ', grunt);
-        console.log('print config.folders:\n', grunt.config('folders'), '\n\n');
-        console.log('print config.files:\n', grunt.config('files'), '\n\n');
-    });
-
-    grunt.registerTask('displayFiles', 'Display config files', function () {
-        var files = grunt.file.expand(grunt.config('files.app.coffee'));
-        console.log('files: ', files);
-        var i = 0;
-        for (var file in files) {
-            console.log('file ', ++i, path.resolve(file), file);
-        }
-    });
 };
