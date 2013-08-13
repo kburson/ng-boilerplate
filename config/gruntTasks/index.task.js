@@ -63,5 +63,4 @@ module.exports = function (grunt) {
             }
         });
     });
-    grunt.verbose.writeln("\x1b[33m============= \x1b[36mLoaded custom grunt task \x1b[0m[\x1b[32;1mindex\x1b[0m]");
 }

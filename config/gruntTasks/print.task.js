@@ -8,7 +8,6 @@ module.exports = function (grunt) {
         console.log('print config.folders:\n', grunt.config('folders'), '\n\n');
         console.log('print config.files:\n', grunt.config('files'), '\n\n');
     });
-    grunt.verbose.writeln("\x1b[33m============= \x1b[36mLoaded custom grunt task \x1b[0m[\x1b[32;1mprint\x1b[0m]");
 
     grunt.registerTask('displayFiles', 'Display config files', function () {
         var files = grunt.file.expand(grunt.config('files.app.coffee'));
@@ -18,5 +17,4 @@ module.exports = function (grunt) {
             console.log('file ', ++i, path.resolve(file), file);
         }
     });
-    grunt.verbose.writeln("\x1b[33m============= \x1b[36mLoaded custom grunt task \x1b[0m[\x1b[32;1mdisplayFiles\x1b[0m]");
 }

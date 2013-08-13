@@ -1,13 +1,6 @@
 'use strict';
 /* jslint camelcase: false */
 
-//var path = require('path');
-//var fs = require('fs');
-//var glob = require('glob');
-//var Minimatch = require("minimatch").Minimatch;
-
-//var remote = require('./node_modules/protractor/node_modules/selenium-webdriver/remote');
-
 
 module.exports = function (grunt) {
 
@@ -20,14 +13,12 @@ module.exports = function (grunt) {
      * Load user custom grunt task definitions
      */
 
-    //var userTasks = require('<%= folders.config %>/build.tasks.js');
-    grunt.file.expand('./config/**/*.task.js').forEach(
-        function(file){
+        //var userTasks = require('<%= folders.config %>/build.tasks.js');
+    grunt.file.expand('./config/**/*.task.js').forEach( function (file) {
             require(file)(grunt);
-            file = file.substring(file.lastIndexOf('/')+1, file.indexOf('.task.js'));
+            file = file.substring(file.lastIndexOf('/') + 1, file.indexOf('.task.js'));
             grunt.verbose.writeln('\x1b[33m============= \x1b[36mLoaded custom grunt task \x1b[0m[\x1b[32;1m' + file + '\x1b[0m]');
-        }
-    );
+        });
 
 
     /******************************************************************************
@@ -103,20 +94,12 @@ module.exports = function (grunt) {
                 command: 'node_modules/bower/bin/bower prune --verbose'
             },
             kill_phantom: {
-                command: [
-                    '(ps -eo pid,command | grep "phantomjs" | grep -v "grep")',
-                    '(ps -eo pid,command | grep "phantomjs" | grep -v "grep" | awk "{ print $1 }" | xargs kill -9 )'
-                ].join('&&')
+                command: 'ps -eo pid,command | grep "phantomjs" | grep -v "grep" | tee /dev/tty | awk \'{ print $1 }\' | xargs kill -9 '
             },
-            kill_unit: {
-                command: '(lsof -P | grep <%= karma.unit.port %>) && (time lsof -P | grep <%= karma.unit.port %> | awk "{print $2}" | xargs echo | sed "s/ /, /g" | xargs kill -9 2&>1 /dev/null)'
+            kill_port: {
+                command: 'lsof -i -P | grep <%= grunt.option("port") %> | tee /dev/tty | awk \'{print $2}\' | xargs echo | sed "s/ /, /g" | xargs kill -9'
             },
-            kill_midway: {
-                command: '(lsof -P | grep <%= karma.midway.port %>) && (time lsof -P | grep <%= karma.unit.port %> | awk "{print $2}" | xargs echo | sed "s/ /, /g" | xargs kill -9 2&>1 /dev/null)'
-            },
-            kill_e2e: {
-                command: '(lsof -P | grep <%= karma.e2e.port %>) && (time lsof -P | grep <%= karma.unit.port %> | awk "{print $2}" | xargs echo | sed "s/ /, /g" | xargs kill -9 2&>1 /dev/null)'
-            },
+
             install_selenium: {
                 command: './node_modules/protractor/bin/install_selenium_standalone'
             },
@@ -284,6 +267,35 @@ module.exports = function (grunt) {
             }
         },
 
+
+        useminPrepare: {
+            html: '<%= folders.app %>/index.html',
+            options: {
+                dest: '<%= folders.compile %>'
+            }
+        },
+
+        usemin: {
+            html: ['<%= folders.compile %>/{,**/}*.html'],
+            css: ['<%= folders.compile %>/styles/{,**/}*.css'],
+            options: {
+                dirs: ['<%= folders.compile %>']
+            }
+        },
+
+        imagemin: {
+            release: {
+                files: [
+                    {
+                        expand: true,
+                        cwd: '<%= folders.app %>/images',
+                        src: '{,**/}*.{png,jpg,jpeg}',
+                        dest: '<%= folders.compile %>/images'
+                    }
+                ]
+            }
+        },
+
         /**
          * `ng-min` annotates the sources before minifying.
          * That is, it allows us to code without the angular injection array syntax.
@@ -291,8 +303,8 @@ module.exports = function (grunt) {
         ngmin: {
             compile: {
                 files: [
-                    {
-                        src: [ '<%= files.app.js %>' ],
+                    {   // TODO:  Can ngmin work on coffee files ???
+                        src: [ '<%= files.app.js %>', '<%= files.app.coffee %>'],
                         cwd: '<%= folders.build %>',
                         dest: '<%= folders.build %>',
                         expand: true
@@ -596,28 +608,68 @@ module.exports = function (grunt) {
             server: { url: 'http://localhost:9400' }
         },
 
-        /* configurations for protractor functional tests (e2e) */
-        protractor: {
 
-        },
+//        simplemocha: {
+//            options: {
+//                globals: ['should', 'expect', 'assert'],
+//                timeout: 3000,   // timeout in milliseconds
+//                ignoreLeaks: false,  // ignore global leaks
+//                //grep: '*-test',   // string or regexp to filter tests with
+//                ui: 'bdd',  // name "bdd", "tdd", "exports" etc
+//                reporter: 'tap',  // reporter instance, defaults to `mocha.reporters.Dot`
+//                //bail: true, // bail on the first test failure, default = true
+//                slow: 30000 // milliseconds to wait before considering a test slow
+//            },
+//
+//            e2e: {
+//                src: ['src/test/e2e/**/*.mocha.coffee']
+//            }
+//        },
 
-        simplemocha: {
+        webdriver: {
             options: {
-                globals: ['should', 'expect', 'assert'],
-                timeout: 3000,   // timeout in milliseconds
-                ignoreLeaks: false,  // ignore global leaks
-                //grep: '*-test',   // string or regexp to filter tests with
-                ui: 'bdd',  // name "bdd", "tdd", "exports" etc
-                reporter: 'tap',  // reporter instance, defaults to `mocha.reporters.Dot`
-                //bail: true, // bail on the first test failure, default = true
-                slow: 30000 // milliseconds to wait before considering a test slow
-            },
 
-            e2e: {
-                src: ['src/test/e2e/**/*.mocha.coffee']
+                // ----- How to setup Selenium
+                // There are three ways to specify how to use Selenium. Specify one of the
+                // following:
+                // 1. seleniumServerJar - to start Selenium Standalone locally.
+                // 2. seleniumAddress - to connect to a Selenium server which is already
+                //     running.
+                // 3. sauceUser/sauceKey - to use remote Selenium servers via SauceLabs.
+                // The location of the selenium standalone server .jar file.
+                seleniumServerJar: './selenium/selenium-server-standalone-2.33.0.jar',
+
+                // The port to start the selenium server on, or null if the server should
+                // find its own unused port.
+                //port: 4444,
+                //host: 'localhost',
+
+                // The address of a running selenium server.
+                //seleniumAddress: 'http://localhost:4444/wd/hub',
+
+                // Additional command line options to pass to selenium. For example,
+                // if  you need to change the browser timeout, use
+                // seleniumArgs: [-browserTimeout=60],
+                seleniumArgs: [],
+
+
+                // Chromedriver location is used to help the selenium standalone server
+                // find chromedriver. This will be passed to the selenium jar as
+                // the system property webdriver.chrome.driver. If null, selenium will
+                // attempt to find chromedriver using PATH.
+                chromeDriver: './selenium/chromedriver',
+
+                // ----- Capabilities to be passed to the webdriver instance.
+                // For a full list of available capabilities, see
+                // https://code.google.com/p/selenium/wiki/DesiredCapabilities
+                capabilities: {
+                    'browserName': 'chrome'
+                }
+            },
+            do:{
+                port: 9999
             }
         },
-
 
         tests: {
             common: {
@@ -631,6 +683,42 @@ module.exports = function (grunt) {
             },
             unit: {
                 port: 9010,
+
+//[
+//    'vendor/angular/angular.js',
+//    'vendor/angular/index.js',
+//    'vendor/angular-resource/index.js',
+//    'vendor/angular-placeholders/angular-placeholders.js',
+//    'vendor/angular-ui-router/release/angular-ui-router.js',
+//    'vendor/angular-ui-utils/modules/route/route.js',
+//    'vendor/angular-bootstrap/ui-bootstrap-tpls.min.js'
+//]
+
+//[   'src/app/**/*.tpl.html'],
+//[   'src/common/**/*.tpl.html']
+
+//[
+//    'src/**/*.js',
+//    '!src/**/*.spec.js',
+//    '!src/**/*.scenario.js',
+//    '!src/test/**/*.js'
+//],
+//[
+//    'src/**/*.coffee',
+//    '!src/**/*.spec.coffee',
+//    '!src/**/*.scenario.coffee',
+//    '!src/**/*.coffee'
+//]
+
+
+// options:
+
+//      {pattern: 'vendor/angular-mocks/index.js', watched: false},
+//      {pattern: 'node_modules/sinon/pkg/sinon.js', watched: false},
+
+//      ['src/**/*.unit.spec.js',       'src/test/unit/**/*.spec.js'],
+//      ['src/**/*.unit.spec.coffee',   'src/test/unit/**/*.spec.coffee']
+
                 files: [
                     {pattern: 'vendor/angular-mocks/index.js', watched: false},
                     {pattern: 'node_modules/sinon/pkg/sinon.js', watched: false},
@@ -650,11 +738,11 @@ module.exports = function (grunt) {
             e2e: {
                 port: 9030, // server listening on port
                 files: [
-                    {pattern: 'node_modules/protractor/node_modules/selenium-webdriver/index.js', watched: false},
-                    {pattern: 'node_modules/protractor/lib/protractor.js', watched: false},
-                    '<%=folders.test.test %>/functionalTestBase.coffee',
-                    '<%= files.test.e2e.js %>',
-                    '<%= files.test.e2e.coffee %>'
+                    //{pattern: 'node_modules/protractor/node_modules/selenium-webdriver/index.js', watched: false},
+                    //{pattern: 'node_modules/protractor/lib/protractor.js', watched: false},
+                    //'<%=folders.test.all %>/functionalTestBase.coffee',
+                    //'<%= files.test.e2e.js %>',
+                    //'<%= files.test.e2e.coffee %>'
                 ]
             }
         },
@@ -697,6 +785,10 @@ module.exports = function (grunt) {
                 captureTimeout: 5000,
 
                 frameworks: ['mocha', 'chai', 'chai-as-promised', 'sinon-chai'], // mocha, jasmine, ng-scenario
+                nestedFileMerge: true,
+
+                // TODO: create karma-protractor plugin to make protractor library available to all e2e tests.
+                // TODO: rename this grunt-karma-webdriver
 
                 plugins: [
                     //'karma-jasmine',
@@ -733,13 +825,17 @@ module.exports = function (grunt) {
             },
 
             unit: {
-                port: '<%= tests.unit.port %>',// server listening on port
-                files: '<%= tests.unit.files %>'
+                options: {
+                    files: '<%= tests.unit.files %>'
+                },
+                port: '<%= tests.unit.port %>'// server listening on port
             },
 
             ci_unit: {
+                options: {
+                    files: '<%= tests.unit.files %>'
+                },
                 port: '<%= tests.unit.port %>',// server listening on port
-                files: '<%= tests.unit.files %>',
                 singleRun: true,
                 background: false
             },
@@ -757,11 +853,14 @@ module.exports = function (grunt) {
             },
 
             e2e: {
+                start_selenium: true,
                 port: '<%= tests.e2e.port %>',// server listening on port
                 files: '<%= tests.e2e.files %>'
             },
 
             ci_e2e: {
+                start_selenium: true,
+                kill_selenium: true,
                 port: '<%= tests.e2e.port %>',// server listening on port
                 files: '<%= tests.e2e.files %>',
                 singleRun: true,
@@ -996,7 +1095,6 @@ module.exports = function (grunt) {
     grunt.renameTask('watch', 'delta');
 
 
-
     /*
      The test servers stay in process as long as the grunt process is running.
      When running with the 'grunt-watch' (renamed 'delta') this holds the grunt process alive forever.
@@ -1044,9 +1142,9 @@ module.exports = function (grunt) {
      * quick-build task which gets executed by travis. We have to decouple this one
      * from build task, because travis ci can't handle less etc.
      */
-    grunt.registerTask('quick-build', ['clean','html2js','jshint','coffeelint','coffee']);
+    grunt.registerTask('quick-build', ['clean', 'html2js', 'jshint', 'coffeelint', 'coffee']);
 
-    grunt.registerTask('assemble',['recess:build','copy:build_assets','copy:build_appjs','copy:build_vendorjs',
+    grunt.registerTask('assemble', ['recess:build', 'copy:build_assets', 'copy:build_appjs', 'copy:build_vendorjs',
         'copy:build_vendorcss', // ??
         'index:build'
     ]);
@@ -1055,8 +1153,8 @@ module.exports = function (grunt) {
      * The `compile` task gets your app ready for deployment by concatenating and
      * minifying your code.
      */
-    grunt.registerTask('compile',['recess:compile','copy:compile_assets','ngmin','concat:compile_js',
-        'uglify','index:compile'
+    grunt.registerTask('compile', ['recess:compile', 'copy:compile_assets', 'ngmin', 'concat:compile_js',
+        'uglify', 'index:compile'
     ]);
 
     grunt.registerTask('release', ['changelog']);

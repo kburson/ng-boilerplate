@@ -23,10 +23,10 @@ module.exports = {
         assets: '<%= folders.src %>/assets',
         src: 'src',
         test: {
-            test: '<%= folders.src %>/test',
-            unit: '<%= folders.test.test %>/unit',
-            midway: '<%= folders.test.test %>/midway',
-            e2e: '<%= folders.test.test %>/e2e'
+            all: '<%= folders.src %>/test',
+            unit: '<%= folders.test.all %>/unit',
+            midway: '<%= folders.test.all %>/midway',
+            e2e: '<%= folders.test.all %>/e2e'
         }
     },
 
@@ -45,13 +45,13 @@ module.exports = {
                 '<%= folders.src %>/**/*.js',
                 '!<%= folders.src %>/**/*.spec.js',
                 '!<%= folders.src %>/**/*.scenario.js',
-                '!<%= folders.test.test %>/**/*.js'
+                '!<%= folders.test.all %>/**/*.js'
             ],
             coffee: [
                 '<%= folders.src %>/**/*.coffee',
                 '!<%= folders.src %>/**/*.spec.coffee',
                 '!<%= folders.src %>/**/*.scenario.coffee',
-                '!<%= folders.test.test %>/**/*.coffee'
+                '!<%= folders.test.all %>/**/*.coffee'
             ]
         },
         test: {
