@@ -1,4 +1,24 @@
+#Protractor:
+
+## locators
+*waitForAngular
+*findElement
+*findElements
+
+## client side mocking
+*addMockModule
+*clearMockModules
+
+## Selectors:
+*By.binding
+*By.select
+*By.seletedOption
+*By.input
+*By.repeater
+
+
 # Grunt Targets
+
 
 ***
 
@@ -11,15 +31,32 @@ What are the grunt targets that can be run from the command line (or from other 
 ***
 
 - default:
-- watch:
-- init:
-- quick-build:
-- assemble:
+    - init:
+    - build:
+        - quick-build:
+            - clean
+            - html2js
+            - jshint
+            - coffeelint
+            - coffee
+        - assemble:
+            - recess
+            - copy [build_assets, buiodl_appjs, build_vendorjs, build_vendorcss]
+            - index
+    - compile:
+        - recess
+        - copy [compile, compile_assets]
+        - ngmin
+        - concat
+        - uglify
+        - index
+- release:
+    - changelog
 - test:
-- compile:
-- release
-- index:
-- karmaconfig
+- reset:
+- dev_server:
+- karmaconfig:
+- watch:
 
 ***
 
@@ -128,8 +165,8 @@ Splitting the watch configuration into
 multiple sub-configs allows each set of file types to trigger specific actions
 (so you do not re-compile your coffeescript if you change a template or a json file).
 
-- gruntfile:
-- bowerfile:
+- gruntfile: -> jshint
+- bowerfile: -> bower:prune
 - buildconf:
 - jssrc:
 - coffeesrc:

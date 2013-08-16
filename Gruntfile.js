@@ -4,6 +4,8 @@
 
 module.exports = function (grunt) {
 
+    var _ = grunt.util._;
+
     /**
      * Load in our build configuration file.
      */
@@ -12,13 +14,7 @@ module.exports = function (grunt) {
     /**
      * Load user custom grunt task definitions
      */
-
-        //var userTasks = require('<%= folders.config %>/build.tasks.js');
-    grunt.file.expand('./config/**/*.task.js').forEach( function (file) {
-            require(file)(grunt);
-            file = file.substring(file.lastIndexOf('/') + 1, file.indexOf('.task.js'));
-            grunt.verbose.writeln('\x1b[33m============= \x1b[36mLoaded custom grunt task \x1b[0m[\x1b[32;1m' + file + '\x1b[0m]');
-        });
+    grunt.loadTasks('./config/gruntTasks');
 
 
     /******************************************************************************
@@ -84,6 +80,21 @@ module.exports = function (grunt) {
             }
         },
 
+        wait: {
+            selenium: {
+                options: {
+                    delay: 10000,
+                    before : function() {
+                        console.log(' ---------- Start Selenium Server ---------- ');
+                        grunt.task.run('shell:start_selenium');
+                    },
+                    after : function() {
+                        console.log(' ---------- Selenium Server Started ---------- ');
+                    }
+                }
+            },
+        },
+
         shell: {
             options: {
                 failOnError: false,
@@ -99,12 +110,16 @@ module.exports = function (grunt) {
             kill_port: {
                 command: 'lsof -i -P | grep <%= grunt.option("port") %> | tee /dev/tty | awk \'{print $2}\' | xargs echo | sed "s/ /, /g" | xargs kill -9'
             },
+            echo: {command: 'echo port=<%= grunt.option("port")%>'},
 
             install_selenium: {
                 command: './node_modules/protractor/bin/install_selenium_standalone'
             },
             start_selenium: {
-                command: 'java -jar selenium/selenium-server-standalone-2.33.0.jar -Dwebdriver.chrome.driver=./selenium/chromedriver 2> /dev/null :3 &'
+                options: {
+                    async: true
+                },
+                command: 'java -jar selenium/selenium-server-standalone-2.33.0.jar -Dwebdriver.chrome.driver=./selenium/chromedriver'
             },
             stop_selenium: {
                 command: 'curl "http://localhost:4444/selenium-server/driver/?cmd=shutDownSeleniumServer"'
@@ -153,7 +168,7 @@ module.exports = function (grunt) {
             build_assets: {
                 files: [
                     {
-                        src: ['**', '!README.md'],
+                        src: ['**', '!README.md', '!favicon.ico'],
                         dest: '<%= folders.build %>/assets/',
                         cwd: '<%= folders.assets %>',
                         expand: true
@@ -207,6 +222,19 @@ module.exports = function (grunt) {
                         dest: '<%= folders.compile %>/assets',
                         cwd: '<%= folders.build %>/assets',
                         expand: true
+                    },
+                    {
+                        src: [ 'favicon.ico' ],
+                        dest: '<%= folders.compile %>',
+                        cwd: '<%= folders.assets %>',
+                        expand: true
+                    },
+                    {
+                        src: [ '<%= files.vendor.img %>' ],
+                        dest: '<%= folders.compile %>/assets/img',
+                        //cwd: '<%= folders.assets %>',
+                        expand: true,
+                        flatten: true
                     }
                 ]
             }
@@ -216,6 +244,9 @@ module.exports = function (grunt) {
          * `grunt concat` concatenates multiple source files into a single file.
          */
         concat: {
+            options: {
+                banner: '<%= meta.banner %>'
+            },
             /**
              * The `folders.compile` target is the concatenation of our application source code
              * into a single file. All files matching what's in the `src.js`
@@ -231,11 +262,7 @@ module.exports = function (grunt) {
              * comment with copyright information.
              */
             compile_js: {
-                options: {
-                    banner: '<%= meta.banner %>'
-                },
                 src: [
-                    '<%= files.vendor.js %>',
                     '<%= folders.config %>/module.prefix',
                     '<%= folders.build %>/src/**/*.js',
                     '<%= html2js.app.dest %>',
@@ -243,6 +270,19 @@ module.exports = function (grunt) {
                     '<%= folders.config %>/module.suffix'
                 ],
                 dest: '<%= folders.compile %>/assets/<%= pkg.name %>.js'
+            },
+
+            vendor_js_min: {
+                src: [ '<%= files.vendor_min.js %>'],
+                dest: '<%= folders.compile %>/assets/vendors.min.js'
+            },
+            vendor_js: {
+                src: [ '<%= files.vendor.js %>'],
+                dest: '<%= folders.compile %>/assets/vendors.js'
+            },
+            vendor_css: {
+                src: [ '<%= files.vendor.css %>'],
+                dest: ['<%= folders.build %>/assets/vendor.css']
             }
         },
 
@@ -254,7 +294,7 @@ module.exports = function (grunt) {
          * it in the final build, but we don't want to include our specs there.
          */
         coffee: {
-            source: {
+            app: {
                 options: {
                     bare: true,
                     sourceMap: true
@@ -368,6 +408,13 @@ module.exports = function (grunt) {
          * Minify the concatenated sources!
          */
         uglify: {
+            debug: {
+                options: {
+                    mangle: false//,
+                    //sourceMap: '<%= folders.compile %>',
+                },
+                files: '<%= uglify.compile.files %>'
+            },
             compile: {
                 options: {
                     banner: '<%= meta.banner %>'
@@ -396,7 +443,7 @@ module.exports = function (grunt) {
          */
         recess: {
             build: {
-                src: [ '<%= files.less %>' ],
+                src: [ '<%= folders.styles %>/main.less'],
                 dest: '<%= folders.build %>/assets/<%= pkg.name %>.css',
                 options: {
                     compile: true,
@@ -489,7 +536,7 @@ module.exports = function (grunt) {
                     livereload: true,
                     port: 9400,
                     hostname: 'localhost', // '*',  change this to '0.0.0.0' to access the server from outside
-                    bases: [ userConfig.folders.build ]
+                    bases: [ userConfig.folders.build, '.' ]
                 }
             }
         },
@@ -583,10 +630,10 @@ module.exports = function (grunt) {
                 src: [
                     '<%= files.vendor.js %>',
                     '<%= folders.build %>/src/**/*.js',
-                    '<%= html2js.common.dest %>',
-                    '<%= html2js.app.dest %>',
-                    '<%= files.vendor.css %>',
-                    '<%= recess.build.dest %>'
+                    '<%= html2js.common.dest %>', // not needed, already included with build/src/**/*.js
+                    '<%= html2js.app.dest %>',    // ditto
+                    '<%= files.vendor.css %>',      // any included library js files
+                    '<%= recess.build.dest %>'      // compiled/concatenated app css files
                 ]
             },
 
@@ -598,6 +645,7 @@ module.exports = function (grunt) {
             compile: {
                 dest: '<%= folders.compile %>',
                 src: [
+                    '<%= concat.vendor_js_min.dest %>',
                     '<%= concat.compile_js.dest %>',
                     '<%= recess.compile.dest %>'
                 ]
@@ -608,67 +656,77 @@ module.exports = function (grunt) {
             server: { url: 'http://localhost:9400' }
         },
 
+        /*
+         this.grep(options.grep);
+         this.suite = new exports.Suite('', new exports.Context);
+         this.ui(options.ui);
+         this.bail(options.bail);
+         this.reporter(options.reporter);
+         if (options.timeout) this.timeout(options.timeout);
+         if (options.slow) this.slow(options.slow);
+         */
+        simplemocha: {
+            options: {
+                //grep: '*-test',   // string or regexp to filter tests with
+                ui: 'bdd',  // name "bdd", "tdd", "exports" etc
+                //bail: true, // bail on the first test failure, default = true
+                reporter: 'spec',//'tap',  // reporter instance, defaults to `mocha.reporters.Dot`
+                timeout: 3000,   // timeout in milliseconds
+                slow: 30000, // milliseconds to wait before considering a test slow
 
-//        simplemocha: {
-//            options: {
-//                globals: ['should', 'expect', 'assert'],
-//                timeout: 3000,   // timeout in milliseconds
-//                ignoreLeaks: false,  // ignore global leaks
-//                //grep: '*-test',   // string or regexp to filter tests with
-//                ui: 'bdd',  // name "bdd", "tdd", "exports" etc
-//                reporter: 'tap',  // reporter instance, defaults to `mocha.reporters.Dot`
-//                //bail: true, // bail on the first test failure, default = true
-//                slow: 30000 // milliseconds to wait before considering a test slow
-//            },
-//
-//            e2e: {
-//                src: ['src/test/e2e/**/*.mocha.coffee']
-//            }
-//        },
+                // invert: true,
+                ignoreLeaks: false,  // ignore global leaks
+                //growl: false,
+                globals: ['should', 'expect', 'assert'],
+                //asyncOnly: true
+
+                compiler: 'coffee-script'
+            },
+
+            e2e: {
+                src: ['src/test/e2e/**/*.mocha.coffee']
+            }
+        },
 
         webdriver: {
-            options: {
 
-                // ----- How to setup Selenium
-                // There are three ways to specify how to use Selenium. Specify one of the
-                // following:
-                // 1. seleniumServerJar - to start Selenium Standalone locally.
-                // 2. seleniumAddress - to connect to a Selenium server which is already
-                //     running.
-                // 3. sauceUser/sauceKey - to use remote Selenium servers via SauceLabs.
-                // The location of the selenium standalone server .jar file.
-                seleniumServerJar: './selenium/selenium-server-standalone-2.33.0.jar',
+            // ----- How to setup Selenium
+            // There are three ways to specify how to use Selenium. Specify one of the
+            // following:
+            // 1. seleniumServerJar - to start Selenium Standalone locally.
+            // 2. seleniumAddress - to connect to a Selenium server which is already
+            //     running.
+            // 3. sauceUser/sauceKey - to use remote Selenium servers via SauceLabs.
+            // The location of the selenium standalone server .jar file.
+            seleniumServerJar: './selenium/selenium-server-standalone-2.33.0.jar',
 
-                // The port to start the selenium server on, or null if the server should
-                // find its own unused port.
-                //port: 4444,
-                //host: 'localhost',
+            // The port to start the selenium server on, or null if the server should
+            // find its own unused port.
+            //port: 4444,
+            //host: 'localhost',
 
-                // The address of a running selenium server.
-                //seleniumAddress: 'http://localhost:4444/wd/hub',
+            // The address of a running selenium server.
+            //seleniumAddress: 'http://localhost:4444/wd/hub',
 
-                // Additional command line options to pass to selenium. For example,
-                // if  you need to change the browser timeout, use
-                // seleniumArgs: [-browserTimeout=60],
-                seleniumArgs: [],
+            // Additional command line options to pass to selenium. For example,
+            // if  you need to change the browser timeout, use
+            // seleniumArgs: [-browserTimeout=60],
+            seleniumArgs: [],
 
 
-                // Chromedriver location is used to help the selenium standalone server
-                // find chromedriver. This will be passed to the selenium jar as
-                // the system property webdriver.chrome.driver. If null, selenium will
-                // attempt to find chromedriver using PATH.
-                chromeDriver: './selenium/chromedriver',
+            // Chromedriver location is used to help the selenium standalone server
+            // find chromedriver. This will be passed to the selenium jar as
+            // the system property webdriver.chrome.driver. If null, selenium will
+            // attempt to find chromedriver using PATH.
+            chromeDriver: './selenium/chromedriver',
 
-                // ----- Capabilities to be passed to the webdriver instance.
-                // For a full list of available capabilities, see
-                // https://code.google.com/p/selenium/wiki/DesiredCapabilities
-                capabilities: {
-                    'browserName': 'chrome'
-                }
-            },
-            do:{
-                port: 9999
+            // ----- Capabilities to be passed to the webdriver instance.
+            // For a full list of available capabilities, see
+            // https://code.google.com/p/selenium/wiki/DesiredCapabilities
+            capabilities: {
+                'browserName': 'chrome'
             }
+
         },
 
         tests: {
@@ -683,42 +741,6 @@ module.exports = function (grunt) {
             },
             unit: {
                 port: 9010,
-
-//[
-//    'vendor/angular/angular.js',
-//    'vendor/angular/index.js',
-//    'vendor/angular-resource/index.js',
-//    'vendor/angular-placeholders/angular-placeholders.js',
-//    'vendor/angular-ui-router/release/angular-ui-router.js',
-//    'vendor/angular-ui-utils/modules/route/route.js',
-//    'vendor/angular-bootstrap/ui-bootstrap-tpls.min.js'
-//]
-
-//[   'src/app/**/*.tpl.html'],
-//[   'src/common/**/*.tpl.html']
-
-//[
-//    'src/**/*.js',
-//    '!src/**/*.spec.js',
-//    '!src/**/*.scenario.js',
-//    '!src/test/**/*.js'
-//],
-//[
-//    'src/**/*.coffee',
-//    '!src/**/*.spec.coffee',
-//    '!src/**/*.scenario.coffee',
-//    '!src/**/*.coffee'
-//]
-
-
-// options:
-
-//      {pattern: 'vendor/angular-mocks/index.js', watched: false},
-//      {pattern: 'node_modules/sinon/pkg/sinon.js', watched: false},
-
-//      ['src/**/*.unit.spec.js',       'src/test/unit/**/*.spec.js'],
-//      ['src/**/*.unit.spec.coffee',   'src/test/unit/**/*.spec.coffee']
-
                 files: [
                     {pattern: 'vendor/angular-mocks/index.js', watched: false},
                     {pattern: 'node_modules/sinon/pkg/sinon.js', watched: false},
@@ -740,9 +762,9 @@ module.exports = function (grunt) {
                 files: [
                     //{pattern: 'node_modules/protractor/node_modules/selenium-webdriver/index.js', watched: false},
                     //{pattern: 'node_modules/protractor/lib/protractor.js', watched: false},
-                    //'<%=folders.test.all %>/functionalTestBase.coffee',
-                    //'<%= files.test.e2e.js %>',
-                    //'<%= files.test.e2e.coffee %>'
+                   // '<%= folders.test.all %>/functionalTestBase.coffee',
+                    '<%= files.test.e2e.js %>',
+                    '<%= files.test.e2e.coffee %>'
                 ]
             }
         },
@@ -788,7 +810,6 @@ module.exports = function (grunt) {
                 nestedFileMerge: true,
 
                 // TODO: create karma-protractor plugin to make protractor library available to all e2e tests.
-                // TODO: rename this grunt-karma-webdriver
 
                 plugins: [
                     //'karma-jasmine',
@@ -797,11 +818,11 @@ module.exports = function (grunt) {
                     'karma-coverage',
                     'karma-chai-plugins',
                     'karma-spec-reporter',
-                    //'karma-ng-scenario', // this is being replaced by protractor
-                    //'karma-chrome-launcher',
-                    //'karma-firefox-launcher',
-                    //'karma-safari-launcher',
-                    //'karma-script-launcher',
+                    'karma-ng-scenario', // this is being replaced by protractor
+                    'karma-chrome-launcher',
+                    'karma-firefox-launcher',
+                    'karma-safari-launcher',
+                    'karma-script-launcher',
                     'karma-phantomjs-launcher',
                     'karma-coffee-preprocessor',
                     'karma-html2js-preprocessor',
@@ -825,22 +846,20 @@ module.exports = function (grunt) {
             },
 
             unit: {
-                options: {
-                    files: '<%= tests.unit.files %>'
-                },
+                //browsers: ['Chrome'],
+                files: '<%= tests.unit.files %>',
                 port: '<%= tests.unit.port %>'// server listening on port
             },
 
             ci_unit: {
-                options: {
-                    files: '<%= tests.unit.files %>'
-                },
+                files: '<%= tests.unit.files %>',
                 port: '<%= tests.unit.port %>',// server listening on port
                 singleRun: true,
                 background: false
             },
 
             midway: {
+                //browsers: ['Chrome'],
                 port: '<%= tests.midway.port %>',// server listening on port
                 files: '<%= tests.midway.files %>'
             },
@@ -853,20 +872,29 @@ module.exports = function (grunt) {
             },
 
             e2e: {
-                start_selenium: true,
+                frameworks: ['ng-scenario','mocha', 'chai', 'chai-as-promised', 'sinon-chai'],
+
+                browsers:['Chrome'],
                 port: '<%= tests.e2e.port %>',// server listening on port
                 files: '<%= tests.e2e.files %>'
             },
 
             ci_e2e: {
-                start_selenium: true,
-                kill_selenium: true,
+                frameworks: ['ng-scenario','mocha', 'chai', 'chai-as-promised', 'sinon-chai'],
+
+                browsers:['Chrome'],
                 port: '<%= tests.e2e.port %>',// server listening on port
                 files: '<%= tests.e2e.files %>',
                 singleRun: true,
                 background: false
 
+            },
+            mocha: {
+                browsers:['Chrome'],
+                port: '<%= tests.e2e.port %>',// server listening on port
+                files: '<%= tests.e2e.files %>' //,'!<%= folders.test.e2e %>/*.mocha.*']
             }
+
         },
 
 
@@ -910,7 +938,8 @@ module.exports = function (grunt) {
          *
          * But we don't need the same thing to happen for all the files.
          */
-        delta: {
+        //delta: {
+        watch: {
 
             /**
              * By default, we want the Live Reload to work for all tasks; this is
@@ -958,9 +987,7 @@ module.exports = function (grunt) {
             jssrc: {
                 files: [ '<%= files.app.js %>' ],
                 tasks: ['jshint:src',
-                    'karma:unit:run',
-                    'karma:midway:run',
-                    //'karma:e2e:run',
+                    'run_tests',
                     'copy:build_appjs'
                 ]
             },
@@ -973,9 +1000,7 @@ module.exports = function (grunt) {
                 files: ['<%= files.app.coffee %>'],
                 tasks: [ 'coffeelint:src',
                     'coffee:source',
-                    'karma:unit:run',
-                    'karma:midway:run',
-                    //'karma:e2e:run',
+                    'run_tests',
                     'copy:build_appjs'
                 ]
             },
@@ -992,15 +1017,15 @@ module.exports = function (grunt) {
             /**
              * When index.html changes, we need to compile it.
              */
-            html: {
-                files: [ '<%= files.html %>' ],
+            index: {
+                files: [ '<%= files.index %>' ],
                 tasks: [ 'index:build' ]
             },
 
             /**
              * When our templates change, we only rewrite the template cache.
              */
-            tpls: {
+            templates: {
                 files: [
                     '<%= files.templates.app %>',
                     '<%= files.templates.common %>'
@@ -1015,6 +1040,8 @@ module.exports = function (grunt) {
                 files: [ '<%=files.less%>' ],
                 tasks: [ 'recess:build' ]
             },
+
+            /** The following watch targets are tests, so they do NOT trigger livereload **/
 
             /**
              * When a JavaScript test file changes, we only want to lint it and
@@ -1070,6 +1097,42 @@ module.exports = function (grunt) {
         }
     };
 
+//    var updateTaskFiles = function(target, files){
+//        console.log('setting ', target + '.files = ', files);
+//        console.log('task files:',grunt.config.get([target,'files']));//,files);
+//    };
+//
+//    var watchEventQueue = [];
+//    var onChange = function()  {
+//        // copy the event queue and process it
+//        var events = watchEventQueue.slice(0);
+//        watchEventQueue = [];
+//
+//        var files = [];
+//        events.forEach(function(event) {
+//            console.log('\n',event.file, event.trigger,'for',event.target);
+//            if (!files[event.target]) {files[event.target] = [];}
+//            if (!_.contains(files[event.target],event.file)) {
+//                files[event.target].push(event.file);
+//            }
+//        });
+//        for (var target in files) {
+//            //console.log(target,' files: ', tasks[target]);
+//            var watchTargetTaskList = grunt.config.get(['watch',target,'tasks']);
+//            for (var i = 0; i < watchTargetTaskList.length; i++) {
+//                updateTaskFiles(watchTargetTaskList[i],files[target]);
+//            }
+//        }
+//    };
+//
+//
+//
+//    grunt.event.on('watch', function(event, filepath, target) {
+//
+//        console.log('\nwatch event triggered for ', filepath, ' by ', event,' for ', target);
+//        watchEventQueue.push( {trigger: event, file: filepath, target: target});
+//        return _.debounce(onChange(), 250);
+//    });
 
     /******************************************************************************
      * Load required Grunt tasks. These are installed based on the versions listed
@@ -1077,7 +1140,7 @@ module.exports = function (grunt) {
      ******************************************************************************/
     require('matchdep').filterDev('grunt-*').forEach(grunt.loadNpmTasks);
 
-    grunt.initConfig(grunt.util._.merge(taskConfig, userConfig));
+    grunt.initConfig(_.merge(taskConfig, userConfig));
 
     /******************************************************************************
      *
@@ -1085,43 +1148,10 @@ module.exports = function (grunt) {
      *
      ******************************************************************************/
 
-    /**
-     * In order to make it safe to just compile or copy *only* what was changed,
-     * we need to ensure we are starting from a clean, fresh build. So we rename
-     * the `watch` task to `delta` (that's why the configuration var above is
-     * `delta`) and then add a new task called `watch` that does a clean build
-     * before watching for changes.
-     */
-    grunt.renameTask('watch', 'delta');
+    grunt.registerTask('e2e_mocha', ['express:e2e','simplemocha']);
+    grunt.registerTask('e2e_karma', ['express:e2e','karma:ci_e2e']);
 
-
-    /*
-     The test servers stay in process as long as the grunt process is running.
-     When running with the 'grunt-watch' (renamed 'delta') this holds the grunt process alive forever.
-     The build target executes the 'ci' versions of the karma tests, this means they are scheduled for a single run only,
-     although the servers are held in processes until the watch process completes.
-     This effectively blocks the tests from running a subsequent time when any files change.
-     To solve this you MUST run build separately from
-     */
-    grunt.registerTask('watch', function () {
-        grunt.task.run([
-            'build',
-            'shell:kill_phantom',
-            'karma:unit',            // single_run = false
-            'karma:midway',          // single_run = false
-            //'express:e2e',  // to serve app to e2e tests
-            //'karma:e2e',             // acceptance tests
-            //'express:livereload',    // allow dev to see ui changes live
-            'delta'                  // watch for file changes and trigger build events
-        ]);
-    });
-
-    /**
-     * The `build` task gets your app ready to run for development and testing.
-     */
-//    grunt.registerTask('e2e', function () {
-//        grunt.task.run([ 'express:e2e', 'karma:e2e' ]);
-//    });
+    grunt.registerTask('dev', [ 'build','reset','karma:unit','karma:midway','watch']);
 
 
     /**
@@ -1131,9 +1161,30 @@ module.exports = function (grunt) {
 
     grunt.registerTask('test', [ 'reset', 'karma:ci_unit', 'karma:ci_midway' ]);
 
+    grunt.registerTask('run_tests', function() {
+
+        grunt.task.run('karma:unit:run');
+       //console.log(this.errorCount,' failed tests');
+
+        grunt.task.run('karma:midway:run');
+        //grunt.task.run('karma:e2e:run');
+
+        //console.log(this.errorCount,' failed tests');
+        //if(this.errorCount > 0) {
+        //    grunt.fail.warn('tests failed!');
+        //}
+
+    });
+
     grunt.registerTask('dev_server', [ 'open', 'express:livereload', 'express-keepalive']);
 
     grunt.registerTask('reset', [ 'shell:kill_phantom' ]);
+
+
+    grunt.registerTask('killport', function() {
+        console.log('args: ', this);
+        //grunt.task.run( 'shell:kill_port' );
+    });
 
     //The `build` task gets your app ready to run for development and testing.
     grunt.registerTask('build', [ 'quick-build', 'assemble' ]);
@@ -1153,11 +1204,14 @@ module.exports = function (grunt) {
      * The `compile` task gets your app ready for deployment by concatenating and
      * minifying your code.
      */
-    grunt.registerTask('compile', ['recess:compile', 'copy:compile_assets', 'ngmin', 'concat:compile_js',
-        'uglify', 'index:compile'
+    grunt.registerTask('compile:debug', ['recess:compile', 'copy:compile_assets', 'ngmin', 'concat:compile_js', 'concat:vendor_js',
+        'uglify:debug', 'index:compile'
+    ]);
+
+    grunt.registerTask('compile', ['recess:compile', 'copy:compile_assets', 'ngmin', 'concat:compile_js', 'concat:vendor_js_min',
+        'uglify:compile', 'index:compile'
     ]);
 
     grunt.registerTask('release', ['changelog']);
-
 
 };

@@ -1,56 +1,47 @@
 {
-    "name": "ng-boilerplate",
-    "version": "0.3.1",
-
-    "dependencies": {
-        "angular": "http://code.angularjs.org/1.1.5/angular.js",
-        "angular-resource":  "http://code.angularjs.org/1.1.5/angular-resource.js",
-        "angular-bootstrap": "~0.3.0",
-        "angular-ui-router": "~0.0.1",
-        "angular-ui-utils": "~0.0.4",
-        "bootstrap-less": "2.3.2",
-        "angular-placeholders": "git+https://github.com/Iristyle/bower-angular-placeholders.git#0.0.1"
+  "name": "ng-boilerplate",
+  "version": "0.3.1",
+  "dependencies": {
+    "angular": "1.2.0rc1",
+    "angular-resource": "1.2.0rc1",
+    "angular-bootstrap": "~0.5.0",
+    "angular-ui-router": "~0.0.1",
+    "angular-ui-utils": "~0.0.4",
+    "bootstrap-less": "2.3.2",
+    "angular-placeholders": "git+https://github.com/Iristyle/bower-angular-placeholders.git#0.0.1"
+  },
+  "devDependencies": {
+    "angular-mocks": "1.2.0rc1",
+    "angular-scenario": "1.2.0rc1",
+    "ngMidwayTester": "yearofmoo/ngMidwayTester"
+  },
+  "exportsOverride": {
+    "bootstrap-less": {
+      "js": "js/*.js",
+      "less": "less/*.less",
+      "img": "img/*.*"
     },
-
-    "devDependencies": {
-        "angular-mocks": "http://code.angularjs.org/1.1.5/angular-mocks.js",
-        "angular-scenario": "http://code.angularjs.org/1.1.5/angular-scenario.js",
-        "ngMidwayTester": "yearofmoo/ngMidwayTester"
+    "angular-ui-router": {
+      "lib": "lib/*.js",
+      "release": "release/*.js"
     },
-
-    "exportsOverride": {
-        "angular": {
-            ".": "*.js"
-        },
-        "bootstrap-less": {
-            "js": "js/*.js",
-            "less":"less/*.less",
-            "img":"img/*.*"
-        },
-        "angular-ui-router": {
-            "lib": "lib/*.js",
-            "release": "release/*.js"
-        },
-        "angular-ui-utils": {
-            "demo": "demo/*.js",
-            "modules": "modules/**/*.*"
-        }
-    },
-
-    "disabled-dependencies": {
-        "comment": "============= dependencies ============",
-        "json3":             "~3.2.4",
-        "bootstrap-css":     "~2.3.1",
-        "es5-shim":          "~2.0.8",
-        "lodash":            "~1.2.1",
-        "jquery":            "~1.9.1",
-
-        "comment": "============= pending ============",
-        "angular-cookies": "http://code.angularjs.org/1.1.5/angular-cookies.js",
-        "angular-loader": "http://code.angularjs.org/1.1.5/angular-loader.js",
-        "angular-mobile": "http://code.angularjs.org/1.1.5/angular-mobile.js",
-        "angular-sanitize": "http://code.angularjs.org/1.1.5/angular-sanitize.js",
-        "angular-ui": "~0.4.0",
-        "font-awesome": "~3.2.1"
+    "angular-ui-utils": {
+      "demo": "demo/*.js",
+      "modules": "modules/**/*.*"
     }
+  },
+  "disabled-dependencies": {
+    "comment": "============= pending ============",
+    "json3": "~3.2.4",
+    "bootstrap-css": "~2.3.1",
+    "es5-shim": "~2.0.8",
+    "lodash": "~1.2.1",
+    "jquery": "~1.9.1",
+    "angular-cookies": "1.2.0rc1",
+    "angular-loader": "1.2.0rc1",
+    "angular-mobile": "1.2.0rc1",
+    "angular-sanitize": "1.2.0rc1",
+    "angular-ui": "~0.4.0",
+    "font-awesome": "~3.2.1"
+  }
 }

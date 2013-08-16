@@ -2,6 +2,7 @@
 *~
 _build/
 _bin/
+_dist/
 node_modules/
 vendor/
 selenium

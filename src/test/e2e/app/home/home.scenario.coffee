@@ -3,6 +3,7 @@
 # global element:true
 describe "ngBoilerplate.home", ->
     beforeEach ->
+        console.log("executing home.scenario.coffee")
         browser().navigateTo "/"
 
     it "should have a location path /home", ->

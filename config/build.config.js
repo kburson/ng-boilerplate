@@ -18,10 +18,12 @@ module.exports = {
         build: '_build',
         compile: '_dist',
         config: 'config',
+        customTasks: '<%= folders.config %>/gruntTasks',
         docs: 'docs',
         vendor: 'vendor',
-        assets: '<%= folders.src %>/assets',
         src: 'src',
+        assets: '<%= folders.src %>/assets',
+        styles: '<%= folders.src %>/less',
         test: {
             all: '<%= folders.src %>/test',
             unit: '<%= folders.test.all %>/unit',
@@ -74,8 +76,8 @@ module.exports = {
             common: ['<%= folders.src %>/common/**/*.tpl.html']
         },
 
-        html: ['<%= folders.src %>/index.html'],
-        less: ['<%= folders.src %>/less/**/*.less'],
+        index: ['<%= folders.src %>/index.html'],
+        less: ['<%= folders.src %>/**/*.less'],
 
         /**
          * This is the same as `app_files`, except it contains patterns that
@@ -91,11 +93,22 @@ module.exports = {
          * The `vendor_files.css` property holds any CSS files to be automatically
          * included in our app.
          */
+        vendor_min: {
+            js: [
+                '<%= folders.vendor %>/angular/angular.min.js',
+                '<%= folders.vendor %>/angular-resource/angular-resource.min.js',
+                '<%= folders.vendor %>/angular-placeholders/angular-placeholders.js',
+                '<%= folders.vendor %>/angular-ui-utils/modules/route/route.js',
+                '<%= folders.vendor %>/angular-ui-router/release/angular-ui-router.min.js',
+
+                /* with angular-boostrap, do we need bootstrap-less ? */
+                '<%= folders.vendor %>/angular-bootstrap/ui-bootstrap-tpls.min.js'
+            ]
+        },
         vendor: {
             js: [
                 '<%= folders.vendor %>/angular/angular.js',
-                '<%= folders.vendor %>/angular/index.js',
-                '<%= folders.vendor %>/angular-resource/index.js',
+                '<%= folders.vendor %>/angular-resource/angular-resource.js',
                 '<%= folders.vendor %>/angular-placeholders/angular-placeholders.js',
                 '<%= folders.vendor %>/angular-ui-router/release/angular-ui-router.js',
                 '<%= folders.vendor %>/angular-ui-utils/modules/route/route.js',
@@ -109,11 +122,16 @@ module.exports = {
             less: [
                 /* include bootstrap-less files to make 'less' variables available to app styles */
                 /* pick and choose the stylesheets you need */
-                '<%= folders.vendor %>/bootstrap-less/less/*.less'
+                //'<%= folders.vendor %>/bootstrap-less/less/*.less'
+                '<%= folders.vendor %>/**/*.less'
             ],
-            css: [],
+            css: [
+                '<%= folders.vendor %>/**/*.css'
+            ],
             img: [
-                '<%= folders.vendor %>/bootstrap-less/img/*.*'
+                '<%= folders.vendor %>/**/*.jpg',
+                '<%= folders.vendor %>/**/*.gif',
+                '<%= folders.vendor %>/**/*.png'
             ]
         }
     }
