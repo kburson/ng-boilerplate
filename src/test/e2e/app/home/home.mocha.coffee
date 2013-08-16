@@ -7,7 +7,7 @@ webdriver = require("protractor/node_modules/selenium-webdriver")
 protractor = require("protractor/lib/protractor.js")
 
 # global element:true
-describe "ngBoilerplate.home", ->
+describe "AngularCafe.home", ->
 
     @timeout 80000
     driver = undefined

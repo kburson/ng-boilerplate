@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html ng-app="ngBoilerplate" ng-controller="AppCtrl">
+<html ng-app="AngularCafe" ng-controller="AppCtrl">
   <head>
     <meta charset="utf-8"> 
     <title>Project Scaffold</title>
@@ -7,12 +7,13 @@
     <!-- compiled CSS --><% styles.forEach( function ( file ) { %>
     <link rel="stylesheet" type="text/css" href="<%= file %>" /><% }); %>
 
+      <!-- compiled JS --><% scripts.forEach( function ( file ) { %>
+      <script type="text/javascript" src="<%= file %>"></script><% }); %>
+
   </head>
+
   <body>
     <div ui-view="main" ng-animate="animate"></div>
   </body>
-
-  <!-- compiled JS --><% scripts.forEach( function ( file ) { %>
-  <script type="text/javascript" src="<%= file %>"></script><% }); %>
 
 </html>

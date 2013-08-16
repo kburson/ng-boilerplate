@@ -27,7 +27,7 @@ angular.module('titleService', [])
              * @example
              * <pre>
              *  angular.module('myApp', ['titleService']).run(function (titleService) {
-     *    titleService.setSuffix(' | ngBoilerplate');
+     *    titleService.setSuffix(' | AngularCafe');
      *  });
              * </pre>
              */
@@ -48,7 +48,7 @@ angular.module('titleService', [])
              * <pre>
              *  angular.module('myApp', ['titleService']).run(function (titleService) {
      *    // set suffix
-     *    titleService.setSuffix(' | ngBoilerplate');
+     *    titleService.setSuffix(' | AngularCafe');
      *
      *    // get suffix
      *    titleService.getSuffix();

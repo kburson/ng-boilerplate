@@ -38,18 +38,13 @@ module.exports = function (grunt) {
 
         var dirRegEx = new RegExp('^(' + grunt.config('folders.build') + '|' + grunt.config('folders.compile') + ')\/', 'g');
 
-        var jsFiles = filterForJS(this.filesSrc).map(function (file) {
-            return file.replace(dirRegEx, '');
-        });
-
         var cssFiles = filterForCSS(this.filesSrc).map(function (file) {
             return file.replace(dirRegEx, '');
         });
 
-        var coffeeFiles = filterForCoffee(this.filesSrc).map(function (file) {
+        var jsFiles = filterForJS(this.filesSrc).map(function (file) {
             return file.replace(dirRegEx, '');
         });
-        console.log('coffee files for index?: \n', coffeeFiles);
 
         grunt.file.copy(grunt.config('folders.src') + '/index.html', this.data.dest + '/index.html', {
             process: function (contents) {

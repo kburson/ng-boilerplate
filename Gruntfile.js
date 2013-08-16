@@ -24,6 +24,8 @@ module.exports = function (grunt) {
      ******************************************************************************/
     var taskConfig = {
 
+        bowerrc: grunt.file.readJSON('./.bowerrc'),
+
         /**
          * We read in our `package.json` file so we can access the package name and
          * version. It's already there, so we don't repeat ourselves here.
@@ -74,7 +76,16 @@ module.exports = function (grunt) {
                     cleanTargetDir: true,
                     cleanBowerDir: true,
                     layout: 'byComponent',
-                    targetDir: 'vendor',
+                    targetDir: '<%= bowerrc.directory %>',
+                    verbose: true
+                }
+            },
+            /* this not working yet. Waiting for plugin to be updated */
+            prune: {
+                options: {
+                    install:false,
+                    prune:true,
+                    targetDir: '<%= bowerrc.directory %>',
                     verbose: true
                 }
             }
@@ -269,16 +280,16 @@ module.exports = function (grunt) {
                     '<%= html2js.common.dest %>',
                     '<%= folders.config %>/module.suffix'
                 ],
-                dest: '<%= folders.compile %>/assets/<%= pkg.name %>.js'
+                dest: '<%= folders.compile %>/assets/<%= pkg.name %>.min.js'
             },
 
-            vendor_js_min: {
-                src: [ '<%= files.vendor_min.js %>'],
-                dest: '<%= folders.compile %>/assets/vendors.min.js'
-            },
             vendor_js: {
                 src: [ '<%= files.vendor.js %>'],
-                dest: '<%= folders.compile %>/assets/vendors.js'
+                dest: '<%= folders.compile %>/assets/vendors.min.js'
+            },
+            vendor_js_min: {
+                src: [ '<%= files.vendor_min.js %>'],
+                dest: '<%= concat.vendor_js.dest %>'
             },
             vendor_css: {
                 src: [ '<%= files.vendor.css %>'],
@@ -408,19 +419,21 @@ module.exports = function (grunt) {
          * Minify the concatenated sources!
          */
         uglify: {
+            options: {
+                banner: '<%= meta.banner %>'
+                //,sourceMap: '<%= folders.compile %>',
+            },
             debug: {
                 options: {
-                    mangle: false//,
-                    //sourceMap: '<%= folders.compile %>',
-                },
-                files: '<%= uglify.compile.files %>'
-            },
-            compile: {
-                options: {
-                    banner: '<%= meta.banner %>'
+                    mangle: false
                 },
                 files: {
-                    '<%= concat.compile_js.dest %>': '<%= concat.compile_js.dest %>'
+                    '<%= concat.compile_js.dest %>': ['<%= concat.compile_js.dest %>']
+                }
+            },
+            compile: {
+                files: {
+                    '<%= concat.compile_js.dest %>': ['<%= concat.compile_js.dest %>']
                 }
             }
         },
@@ -645,7 +658,7 @@ module.exports = function (grunt) {
             compile: {
                 dest: '<%= folders.compile %>',
                 src: [
-                    '<%= concat.vendor_js_min.dest %>',
+                    '<%= concat.vendor_js.dest %>',
                     '<%= concat.compile_js.dest %>',
                     '<%= recess.compile.dest %>'
                 ]
@@ -688,47 +701,6 @@ module.exports = function (grunt) {
             }
         },
 
-        webdriver: {
-
-            // ----- How to setup Selenium
-            // There are three ways to specify how to use Selenium. Specify one of the
-            // following:
-            // 1. seleniumServerJar - to start Selenium Standalone locally.
-            // 2. seleniumAddress - to connect to a Selenium server which is already
-            //     running.
-            // 3. sauceUser/sauceKey - to use remote Selenium servers via SauceLabs.
-            // The location of the selenium standalone server .jar file.
-            seleniumServerJar: './selenium/selenium-server-standalone-2.33.0.jar',
-
-            // The port to start the selenium server on, or null if the server should
-            // find its own unused port.
-            //port: 4444,
-            //host: 'localhost',
-
-            // The address of a running selenium server.
-            //seleniumAddress: 'http://localhost:4444/wd/hub',
-
-            // Additional command line options to pass to selenium. For example,
-            // if  you need to change the browser timeout, use
-            // seleniumArgs: [-browserTimeout=60],
-            seleniumArgs: [],
-
-
-            // Chromedriver location is used to help the selenium standalone server
-            // find chromedriver. This will be passed to the selenium jar as
-            // the system property webdriver.chrome.driver. If null, selenium will
-            // attempt to find chromedriver using PATH.
-            chromeDriver: './selenium/chromedriver',
-
-            // ----- Capabilities to be passed to the webdriver instance.
-            // For a full list of available capabilities, see
-            // https://code.google.com/p/selenium/wiki/DesiredCapabilities
-            capabilities: {
-                'browserName': 'chrome'
-            }
-
-        },
-
         tests: {
             common: {
                 files: [
@@ -742,6 +714,8 @@ module.exports = function (grunt) {
             unit: {
                 port: 9010,
                 files: [
+                    // TODO: for 1.2.0rc-1
+                    //{pattern: 'vendor/angular-mocks/angular-mocks.js', watched: false},
                     {pattern: 'vendor/angular-mocks/index.js', watched: false},
                     {pattern: 'node_modules/sinon/pkg/sinon.js', watched: false},
                     '<%= files.test.unit.js %>',
@@ -760,9 +734,7 @@ module.exports = function (grunt) {
             e2e: {
                 port: 9030, // server listening on port
                 files: [
-                    //{pattern: 'node_modules/protractor/node_modules/selenium-webdriver/index.js', watched: false},
-                    //{pattern: 'node_modules/protractor/lib/protractor.js', watched: false},
-                   // '<%= folders.test.all %>/functionalTestBase.coffee',
+                    //{pattern: 'vendor/angular-scenario/index.js', watched: false},
                     '<%= files.test.e2e.js %>',
                     '<%= files.test.e2e.coffee %>'
                 ]
@@ -1097,43 +1069,6 @@ module.exports = function (grunt) {
         }
     };
 
-//    var updateTaskFiles = function(target, files){
-//        console.log('setting ', target + '.files = ', files);
-//        console.log('task files:',grunt.config.get([target,'files']));//,files);
-//    };
-//
-//    var watchEventQueue = [];
-//    var onChange = function()  {
-//        // copy the event queue and process it
-//        var events = watchEventQueue.slice(0);
-//        watchEventQueue = [];
-//
-//        var files = [];
-//        events.forEach(function(event) {
-//            console.log('\n',event.file, event.trigger,'for',event.target);
-//            if (!files[event.target]) {files[event.target] = [];}
-//            if (!_.contains(files[event.target],event.file)) {
-//                files[event.target].push(event.file);
-//            }
-//        });
-//        for (var target in files) {
-//            //console.log(target,' files: ', tasks[target]);
-//            var watchTargetTaskList = grunt.config.get(['watch',target,'tasks']);
-//            for (var i = 0; i < watchTargetTaskList.length; i++) {
-//                updateTaskFiles(watchTargetTaskList[i],files[target]);
-//            }
-//        }
-//    };
-//
-//
-//
-//    grunt.event.on('watch', function(event, filepath, target) {
-//
-//        console.log('\nwatch event triggered for ', filepath, ' by ', event,' for ', target);
-//        watchEventQueue.push( {trigger: event, file: filepath, target: target});
-//        return _.debounce(onChange(), 250);
-//    });
-
     /******************************************************************************
      * Load required Grunt tasks. These are installed based on the versions listed
      * in `package.json` when you do `npm install --save-dev` in this directory.
@@ -1151,7 +1086,7 @@ module.exports = function (grunt) {
     grunt.registerTask('e2e_mocha', ['express:e2e','simplemocha']);
     grunt.registerTask('e2e_karma', ['express:e2e','karma:ci_e2e']);
 
-    grunt.registerTask('dev', [ 'build','reset','karma:unit','karma:midway','watch']);
+    grunt.registerTask('dev', [ 'reset','build','karma:unit','karma:midway','watch']);
 
 
     /**
@@ -1176,7 +1111,9 @@ module.exports = function (grunt) {
 
     });
 
-    grunt.registerTask('dev_server', [ 'open', 'express:livereload', 'express-keepalive']);
+    grunt.registerTask('dev_server', [ 'express:livereload', 'express-keepalive', 'open']);
+
+    grunt.registerTask('test_server', [ 'shell:start_selenium']);
 
     grunt.registerTask('reset', [ 'shell:kill_phantom' ]);
 
@@ -1204,11 +1141,15 @@ module.exports = function (grunt) {
      * The `compile` task gets your app ready for deployment by concatenating and
      * minifying your code.
      */
-    grunt.registerTask('compile:debug', ['recess:compile', 'copy:compile_assets', 'ngmin', 'concat:compile_js', 'concat:vendor_js',
+    grunt.registerTask('compile:debug', [
+        'recess:compile', 'copy:compile_assets', 'ngmin',
+        'concat:compile_js', 'concat:vendor_js',
         'uglify:debug', 'index:compile'
     ]);
 
-    grunt.registerTask('compile', ['recess:compile', 'copy:compile_assets', 'ngmin', 'concat:compile_js', 'concat:vendor_js_min',
+    grunt.registerTask('compile', [
+        'recess:compile', 'copy:compile_assets', 'ngmin',
+        'concat:compile_js', 'concat:vendor_js_min',
         'uglify:compile', 'index:compile'
     ]);
 

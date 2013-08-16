@@ -1,7 +1,7 @@
 "use strict"
 
 # global element:true
-describe "ngBoilerplate.home", ->
+describe "AngularCafe.home", ->
     beforeEach ->
         console.log("executing home.scenario.coffee")
         browser().navigateTo "/"

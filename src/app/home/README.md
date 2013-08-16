@@ -32,7 +32,7 @@ The dependencies block is also where component dependencies should be
 specified, as shown below.
 
 ```js
-angular.module( 'ngBoilerplate.home', [
+angular.module( 'AngularCafe.home', [
   'placeholders',
   'titleService'
 ])

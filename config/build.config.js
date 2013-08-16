@@ -5,6 +5,7 @@
  * This file/module contains all configuration for the build process.
  */
 module.exports = {
+
     /**
      * The `build_dir` folder is where our projects are compiled during
      * development and the `compile_dir` folder is where our app resides once it's
@@ -95,8 +96,8 @@ module.exports = {
          */
         vendor_min: {
             js: [
-                '<%= folders.vendor %>/angular/angular.min.js',
-                '<%= folders.vendor %>/angular-resource/angular-resource.min.js',
+                '<%= folders.vendor %>/angular/index.js', // CHANGE TO angular.min.js',
+                '<%= folders.vendor %>/angular-resource/index.js', //angular-resource.min.js',
                 '<%= folders.vendor %>/angular-placeholders/angular-placeholders.js',
                 '<%= folders.vendor %>/angular-ui-utils/modules/route/route.js',
                 '<%= folders.vendor %>/angular-ui-router/release/angular-ui-router.min.js',
@@ -107,8 +108,8 @@ module.exports = {
         },
         vendor: {
             js: [
-                '<%= folders.vendor %>/angular/angular.js',
-                '<%= folders.vendor %>/angular-resource/angular-resource.js',
+                '<%= folders.vendor %>/angular/index.js', // CHANGE TO angular.js
+                '<%= folders.vendor %>/angular-resource/index.js', // angular-resource.js
                 '<%= folders.vendor %>/angular-placeholders/angular-placeholders.js',
                 '<%= folders.vendor %>/angular-ui-router/release/angular-ui-router.js',
                 '<%= folders.vendor %>/angular-ui-utils/modules/route/route.js',
@@ -126,7 +127,7 @@ module.exports = {
                 '<%= folders.vendor %>/**/*.less'
             ],
             css: [
-                '<%= folders.vendor %>/**/*.css'
+               // '<%= folders.vendor %>/**/*.css'
             ],
             img: [
                 '<%= folders.vendor %>/**/*.jpg',

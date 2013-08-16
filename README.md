@@ -1,20 +1,43 @@
-# ngBoilerplate [![Build Status](https://travis-ci.org/neoskop/ng-boilerplate.png?branch=master)](https://travis-ci.org/neoskop/ng-boilerplate) [![Dependency Status](https://gemnasium.com/neoskop/ng-boilerplate.png)](https://gemnasium.com/neoskop/ng-boilerplate)
+# Angular-Cafe
 
 An opinionated kickstarter for [AngularJS](http://angularjs.org) projects.
 
-This Project is forked from [Neoksop GmbH](http://github.com/neoskop/ng-boilerplate)
-Which was forked from [Josh Millers ngBoilerplate](http://joshdmiller.github.com/ng-boilerplate)
-and was customized for [Kendrick Burson](http://github.com/kburson/ng-Boilerplate).
 ***
 
-Why midway testing?
+This Project was forked from [Josh Millers ng-Boilerplate](http://joshdmiller.github.com/ng-boilerplate) by [Neoskop GmbH](http://github.com/neoskop/ng-boilerplate)
+which was then forked and customized as [ng-cafe](http://github.com/kburson/ng-cafe)
+
+If you want to learn more about the foundation of this project template please reference the documentation from the
+fork parents:
+
+* [Neoksop Readme.md](http://github.com/neoskop/ng-boilerplate/README.md)
+* [Josh Millers Readme.md](http://joshdmiller.github.com/ng-boilerplate/README.md)
+
+***
+
+# Why Angular-Cafe
+
+This document will outline the de
+
+***
+
+
+## Why midway testing?
 
 http://blogs.burnsidedigital.com/2013/07/setting-up-midway-testing-to-angularjs-app/
 
-    When Unit testing your application it sometimes may get too complicated when you want to test a application-level operation (like a page loading or XHR request) because you will need to use interceptors and mocks to make requests and templating work (basically anything XHR’ish). E2E testing may not also be the best option because it may be too high level to capture to test for certain features. For example, how do you test a controller on your website that performs a XHR request which downloads the user’s session details on every page? …
+    When Unit testing your application it sometimes may get too complicated when you
+    want to test a application-level operation (like a page loading or XHR request)
+    because you will need to use interceptors and mocks to make requests and
+    templating work (basically anything XHR’ish). E2E testing may not also be the
+    best option because it may be too high level to capture to test for certain
+    features. For example, how do you test a controller on your website that
+    performs a XHR request which downloads the user’s session details on every page? …
 
+## TODO:
+   get code coverage with istanbul working
 
-
+***
 
 ## Quick Start
 
@@ -24,25 +47,73 @@ Following global Tools are needed, if you do not have them already:
 
 ```sh
 $ npm install -g grunt-cli # Grunt Task Manager
-$ npm install -g karma     # Test Runner
-$ npm install -g bower     # Package Manager
 ```
 
 Clone the repository and install all dependencies:
 
 ```sh
-$ git clone git@github.com:kburson/ng-boilerplate.git
-$ cd ng-boilerplate
+$ git clone git@github.com:kburson/ng-cafe.git
+$ cd ng-cafe
 $ npm install
+```
+
+To develop within this project you need [Grunt](http://gruntjs.com), the following Tasks are available:
+
+```sh
+$ grunt
+```
+
+The bower install will download the Angular libraries.  At this time angular is at 1.2.0rc1 while some of the
+dependent libraries are still referencing 1.0.6.  The bower install will attempt to resolve all peer dependencies
+but you will have to answer some interacive questions regarding this mismatch of the angular versions:
+
+```sh
+Unable to find a suitable version for angular, please choose one:
+    1) angular#1.2.0rc1 which resolved to 1.2.0rc1 and has angular-mocks#1.2.0rc1, angular-resource#1.2.0rc1, angular-scenario#1.2.0rc1, ng-cafe as dependants
+    2) angular#>= 1.0.6 which resolved to 1.0.7 and has angular-ui-router#0.0.1 as dependants
+    3) angular#>=1 which resolved to 1.0.7 and has angular-bootstrap#0.5.0 as dependants
+    4) angular#>= 1.0.2 which resolved to 1.0.7 and has angular-ui-utils#0.0.4 as dependants
+```
+
+if you run into trouble you may need to run bower again from the command line
+
+```sh
+$ node_modules/grunt-bower-task/node_modules/bower/bin/bower install
+```
+
+or if you have bower installed globally:
+
+```sh
 $ bower install
 ```
 
-For develop within this project you need [Grunt](http://gruntjs.com), the following Tasks are available:
+to install bower globally use:
 
 ```sh
-$ grunt       # actually this builds the project
-$ grunt watch # starts a server (http://localhost:9000), will wait on changes and reloads the browser
+$ npm install -g bower
 ```
+
+
+To develop within this project you need [Grunt](http://gruntjs.com), the following Tasks are available:
+
+```sh
+$ grunt
+$ grunt <target>
+```
+
+replace **target** with one or more of the following:
+
+* **dev**           # [reset build karma:unit karma:unit:run karma:midway karma:midway:run watch] builds the app, starts the test servers and starts the watch process to wait for changes
+* **dev_server**    # [express:livereload express-keepalive open]starts an express livereload server to view changes to the app as they happen.
+* **test_server**   # [shell:start_selenium] start the selenium webdriver server
+* **e2e_mocha**     # [express:e2e simplemocha] run all e2e tests using mocha (only tests under the e2e test folder named *.mocha.spec.[js|coffee])
+* **e2e_karma**     # [express:e2e karma:ci_e2e] run all e2e tests using karma (only tests under the e2e test folder named *.scenario.[js|coffee])
+* **test**          # [reset karma:ci_unit karma:ci_midway] clear all previous running servers, start test server, run unit + midway tests
+* **run_test**      # [karma:unit:run karma:midway:run] this requires the test servers to be running in the background
+* **build**         # [clean html2js jshint coffeelint coffee recess:build copy index]
+* **compile**       # [compile:debug recess copy ngmin concat uglify index]
+* **compile:debug** # [compile recess copy ngmin concat uglify index]
+* **release**       # [changelog]
 
 
 ### Testing (Unit, E2E, Midway)
@@ -57,14 +128,21 @@ $ karma start # starts watching filechanges and runs trough all test
 $ karma run   # if you want to run tests manually (without watch changes)
 ```
 
-## ng-boilerplate in depth
+
+
+
+***
+
+# THE FOLLOWING IS A COPY OF THE PARENT README
+
+## ng-cafe in depth
 
 ## Purpose
 
-`ngBoilerplate` is designed to make life easy by providing a basic framework
+`AngularCafe` is designed to make life easy by providing a basic framework
 with which to kickstart AngularJS projects. It contains a best-practice
 directory structure to ensure code reusability and maximum scalability.
-ngBoilerplate also comes prepackaged with the most popular design frameworks
+AngularCafe also comes prepackaged with the most popular design frameworks
 around: [Twitter Bootstrap](http://getbootstrap.com),
 [Angular UI](http://angular-ui.github.io),
 [Angular Bootstrap](http://angular-ui.github.io/bootstrap),
@@ -75,8 +153,8 @@ All you have to do is clone it and start coding!
 
 ## Philosophy
 
-The principal goal of `ngBoilerplate` is to set projects up for long-term
-success.  So `ngBoilerplate` tries to follow best practices everywhere it can.
+The principal goal of `AngularCafe` is to set projects up for long-term
+success.  So `AngularCafe` tries to follow best practices everywhere it can.
 These are:
 
 - Properly orchestrated modules to encourage drag-and-drop component re-use.
@@ -94,9 +172,9 @@ These are:
 - Well-documented, to show new developers *why* things are set up the way they
   are.
 - It should be responsive to evidence. Community feedback is therefore crucial
-  to the success of `ngBoilerplate`.
+  to the success of `AngularCafe`.
 
-But `ngBoilerplate` is not an example of an AngularJS app: this is a
+But `AngularCafe` is not an example of an AngularJS app: this is a
 kickstarter. If you're looking for an example of what a complete, non-trivial
 AngularJS app that does something real looks like, complete with a REST backend
 and authentication and authorization, then take a look at
@@ -111,7 +189,7 @@ At a high level, the structure looks roughly like this:
 
 ### Structure
 ```
-ng-boilerplate/
+ng-cafe/
   |
   +- config/
   |  |- build.config.js
@@ -178,7 +256,7 @@ learn more.
 
 ### Detailed Installation
 This section provides a little more detailed understanding of what goes into
-getting `ngBoilerplate` up and running. Though `ngBoilerplate` is really simple
+getting `AngularCafe` up and running. Though `AngularCafe` is really simple
 to use, it might help to have an understanding of the tools involved here, like
 Node.js and Grunt and Bower. If you're completely new to highly organized,
 modern JavaScript development, take a few short minutes to read [this overview
@@ -187,7 +265,7 @@ of the tools](tools.md) before continuing with this section.
 Okay, ready to go? Here it is:
 
 This section provides a little more detailed understanding of what goes into
-getting `ngBoilerplate` up and running. Though `ngBoilerplate` is really simple
+getting `AngularCafe` up and running. Though `AngularCafe` is really simple
 to use, it might help to have an understanding of the tools involved here, like
 Node.js and Grunt and Bower. If you're completely new to highly organized,
 modern JavaScript development, take a few short minutes to read [this overview
@@ -195,7 +273,7 @@ of the tools](tools.md) before continuing with this section.
 
 Okay, ready to go? Here it is:
 
-`ngBoilerplate` uses [Grunt](http://gruntjs.org) as its build system, so
+`AngularCafe` uses [Grunt](http://gruntjs.org) as its build system, so
 [Node.js](http://nodejs.org) is required. Also, Grunt by default no longer comes
 with a command-line utility and Karma and Bower must end up in your global path
 for the build system to find it, so they must be installed independently. Once
@@ -213,7 +291,7 @@ from GitHub, or merge the branch into your existing repository. Assuming you're
 starting from scratch, simply clone this repository using git:
 
 ```sh
-$ git clone git://github.com/kburson/ng-boilerplate    my-project-name
+$ git clone git://github.com/kburson/ng-cafe    my-project-name
 $ cd my-project-name
 ```
 
@@ -248,7 +326,7 @@ application (or we download it from a different computer), we can simply run the
 `bower install` command as above and all our dependencies will be installed for
 us. Neat!
 
-Technically, `ngBoilerplate` is now ready to go.
+Technically, `AngularCafe` is now ready to go.
 
 However, prior to hacking on your application, you will want to modify the
 `package.json` file to contain your project's information. Do not remove any
@@ -319,7 +397,7 @@ changes:
   values configured dynamically by Grunt.
 * `delta:less` - When any `*.less` file within `src/` changes, the
   `src/less/main.less` file is linted and copied into
-  `build/assets/ng-boilerplate.css`.
+  `build/assets/ng-cafe.css`.
 * `delta:jssrc` - When any JavaScript file within `src/` that does not end in
   `.spec.js` changes, all JavaScript sources are linted, all unit tests are run,
   and the all source files are re-copied to `build/src`.
@@ -377,7 +455,7 @@ expected, open the `bin/index.html` file in your browser. Voila!
 
 ### Live Reload!
 
-`ngBoilerplate` also includes [Live Reload](http://livereload.com/), so you no
+`AngularCafe` also includes [Live Reload](http://livereload.com/), so you no
 longer have to refresh your page after making changes! You need a Live Reload
 browser plugin for this:
 
@@ -387,7 +465,7 @@ browser plugin for this:
 - Internet Explorer - Surely you jest.
 
 Note that if you're using the Chrome version with `file://` URLs (as is the
-default with `ngBoilerplate`) you need to tell Live Reload to allow it. Go to
+default with `AngularCafe`) you need to tell Live Reload to allow it. Go to
 `Menu -> Tools -> Extensions` and check the "Allow access to file URLs" box next
 to the Live Reload plugin.
 
@@ -426,7 +504,7 @@ Naturally, I am open to all manner of ideas and suggestions. See the
 
 ### To Do
 
-See the [issues list](http://github.com/kburson/ng-boilerplate/issues). And
+See the [issues list](http://github.com/kburson/ng-cafe/issues). And
 feel free to submit your own!
 
 * **e2e** tests: what is a good name ? [ Acceptance, Functional, UI, Browser, Protractor]

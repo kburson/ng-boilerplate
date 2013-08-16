@@ -1,11 +1,11 @@
-describe 'ngBoilerplate', ->
+describe 'AngularCafe', ->
 
 
     AppCtrl = undefined
     scope = undefined
     location = undefined
     controller = undefined
-    beforeEach module("ngBoilerplate")
+    beforeEach module("AngularCafe")
     beforeEach inject(($rootScope, $controller, $location) ->
         scope = $rootScope.$new()
         location = $location

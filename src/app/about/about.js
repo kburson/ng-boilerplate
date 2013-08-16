@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('ngBoilerplate.about', [
+angular.module('AngularCafe.about', [
         'ui.state',
         'placeholders',
         'ui.bootstrap',

@@ -1,5 +1,5 @@
 "use strict"
-describe "ngBoilerplate", ->
+describe "AngularCafe", ->
     beforeEach ->
         console.log("executing app.scenario.coffee")
         browser().navigateTo "/"

@@ -3,7 +3,7 @@ should = chai.should()
 expect = chai.expect
 assert = chai.assert
 
-describe "ngBoilerplate.home (midway)", ->
+describe "AngularCafe.home (midway)", ->
 
     module = undefined
     deps = undefined
@@ -13,9 +13,9 @@ describe "ngBoilerplate.home (midway)", ->
 
     beforeEach ->
         tester = new ngMidwayTester()
-        tester.register "ngBoilerplate.home"
-        module = angular.module("ngBoilerplate.home")
-        deps = module.value("ngBoilerplate.home").requires
+        tester.register "AngularCafe.home"
+        module = angular.module("AngularCafe.home")
+        deps = module.value("AngularCafe.home").requires
 
     it "should be registered", ->
         expect(module).is.not.null

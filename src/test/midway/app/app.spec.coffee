@@ -3,7 +3,7 @@ should = chai.should()
 expect = chai.expect
 assert = chai.assert
 
-describe "ngBoilerplate", ->
+describe "AngularCafe", ->
     deps = undefined
     hasModule = undefined
     module = undefined
@@ -17,9 +17,9 @@ describe "ngBoilerplate", ->
 
     beforeEach ->
         tester = new ngMidwayTester()
-        tester.register "ngBoilerplate"
-        module = angular.module("ngBoilerplate")
-        deps = module.value("ngBoilerplate").requires
+        tester.register "AngularCafe"
+        module = angular.module("AngularCafe")
+        deps = module.value("AngularCafe").requires
 
     it "should be registered", ->
         expect(module).is.not.null
@@ -30,8 +30,8 @@ describe "ngBoilerplate", ->
     it "should have templates-common dependency", ->
         expect(hasModule("templates-common")).is.true
 
-    it "should have ngBoilerplate.home dependency", ->
-        expect(hasModule("ngBoilerplate.home")).is.true
+    it "should have AngularCafe.home dependency", ->
+        expect(hasModule("AngularCafe.home")).is.true
 
     it "should have ui.state dependency", ->
         expect(hasModule("ui.state")).is.true

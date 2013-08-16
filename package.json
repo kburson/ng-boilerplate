@@ -1,6 +1,6 @@
 {
   "author": "Kendrick Burson",
-  "name": "ng-boilerplate",
+  "name": "ng-cafe",
   "version": "0.3.1",
   "scripts": {
     "test": "./node_modules/karma/bin/karma start build/karma.unit.conf.js --browsers Chrome --single-run"
@@ -59,7 +59,7 @@
     "grunt-concurrent": "~0.3.0",
     "grunt-cdn2": "~1.0.0",
     "grunt-devtools": "~0.1.0",
-    "grunt-bower-task": "~0.2.3",
+    "grunt-bower-task": "~0.3",
     "grunt-protractor": "git+https://github.com/thegreenpizza/grunt-protractor.git",
     "coffee-script": "~1.6.3",
     "grunt-shell-spawn": "~0.2.4",
@@ -82,15 +82,15 @@
     "node": ">= 0.10.x",
     "npm": ">= 1.2.x"
   },
-  "homepage": "https://github.com/kburson/ng-boilerplate",
+  "homepage": "https://github.com/kburson/ng-cafe",
   "licenses": {
     "type": "MIT",
-    "url": "https://raw.github.com/kburson/ng-boilerplate/master/LICENSE"
+    "url": "https://raw.github.com/kburson/ng-cafe/master/LICENSE"
   },
-  "bugs": "https://github.com/kburson/ng-boilerplate/issues",
+  "bugs": "https://github.com/kburson/ng-cafe/issues",
   "repository": {
     "type": "git",
-    "url": "git@github.com:kburson/ng-boilerplate.git"
+    "url": "git@github.com:kburson/ng-cafe.git"
   },
   "contributors": [
     "Kendrick Burson <kburson@rallydev.com> (http://www.rallydev.com)",

@@ -1,10 +1,10 @@
 'use strict';
 
-angular.module('ngBoilerplate', [
+angular.module('AngularCafe', [
         'templates-app',
         'templates-common',
-        'ngBoilerplate.home',
-        'ngBoilerplate.about',
+        'AngularCafe.home',
+        'AngularCafe.about',
         'ui.state',
         'ui.route'
     ])
@@ -14,7 +14,7 @@ angular.module('ngBoilerplate', [
     })
 
     .run(function run(titleService) {
-        titleService.setSuffix(' | ngBoilerplate');
+        titleService.setSuffix(' | AngularCafe');
     })
 
     .controller('AppCtrl', function ($scope) {

@@ -6,7 +6,7 @@ expect = chai.expect
 webdriver = require("protractor/node_modules/selenium-webdriver")
 protractor = require("protractor/lib/protractor.js")
 
-describe "ngBoilerplate", ->
+describe "AngularCafe", ->
     @timeout 80000
     driver = undefined
     ptor = undefined

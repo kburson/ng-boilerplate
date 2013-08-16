@@ -26,7 +26,7 @@ this way makes each module more "self-contained".
 ###
 And of course we define a controller for our route.
 ###
-angular.module("ngBoilerplate.home", ["templates-app", "templates-common", "ui.state", "titleService"])
+angular.module("AngularCafe.home", ["templates-app", "templates-common", "ui.state", "titleService"])
     .config(config = ($stateProvider) ->
         $stateProvider.state "home",
             url: "/home"
