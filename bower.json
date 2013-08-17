@@ -2,8 +2,9 @@
     "name": "ng-cafe",
     "version": "0.3.1",
     "dependencies": {
-        "angular": "http://code.angularjs.org/1.1.5/angular.js",
-        "angular-resource": "http://code.angularjs.org/1.1.5/angular-resource.js",
+        "angular": "1.2.0rc1",
+        "angular-route": "1.2.0rc1",
+        "angular-resource": "1.2.0rc1",
         "angular-bootstrap": "~0.5.0",
         "angular-ui-router": "~0.0.1",
         "angular-ui-utils": "~0.0.4",
@@ -11,23 +12,46 @@
         "angular-placeholders": "git+https://github.com/Iristyle/bower-angular-placeholders.git#0.0.1"
     },
     "devDependencies": {
-        "angular-mocks": "http://code.angularjs.org/1.1.5/angular-mocks.js",
-        "angular-scenario": "http://code.angularjs.org/1.1.5/angular-scenario.js",
+        "angular-mocks": "1.2.0rc1",
+        "angular-scenario": "1.2.0rc1",
         "ngMidwayTester": "yearofmoo/ngMidwayTester"
     },
     "exportsOverride": {
-        "bootstrap-less": {
-            "js": "js/*.js",
-            "less": "less/*.less",
-            "img": "img/*.*"
-        },
         "angular-ui-router": {
             "lib": "lib/*.js",
-            "release": "release/*.js"
+            "release": "release/*.js",
+            ".": "README.md"
         },
         "angular-ui-utils": {
             "demo": "demo/*.js",
-            "modules": "modules/**/*.*"
+            "modules": "modules/**/*.*",
+            ".": "README.md"
+        },
+        "angular-placeholders": {
+            ".": "angular-placeholders.js",
+            ".": "README.md"
+        },
+        "angular-bootstrap": {
+            ".": "*.js"
+        },
+        "angular-mocks": {
+            ".": "*.js"
+        },
+        "angular-resource": {
+            ".": "*.js"
+        },
+        "angular": {
+            ".": "*.js"
+        },
+        "ngMidwayTester": {
+            "Source": "Source/*.js",
+            ".": "README.md"
+        },
+        "bootstrap-less": {
+            "img": "img/*.*",
+            "js": "js/*.js",
+            "less": "less/*.less",
+            ".": "README.md"
         }
     },
     "disabled-dependencies": {

@@ -15,11 +15,16 @@ describe "AngularCafe", ->
     hasModule = (m) ->
         deps.indexOf(m) >= 0
 
-    beforeEach ->
+    before ->
+        console.log("\nExecuting Test: app.spec.coffee");
+
+    before ->
         tester = new ngMidwayTester()
         tester.register "AngularCafe"
+
         module = angular.module("AngularCafe")
         deps = module.value("AngularCafe").requires
+        console.log("\nTest data loaded:", deps);
 
     it "should be registered", ->
         expect(module).is.not.null

@@ -5,6 +5,7 @@ angular.module('AngularCafe', [
         'templates-common',
         'AngularCafe.home',
         'AngularCafe.about',
+        'ngRoute', // ngMidwayTester requires $routeProvider // $route + $routeProvider are deprecated. Angular is moving towards angular-ui-router
         'ui.state',
         'ui.route'
     ])
@@ -14,7 +15,7 @@ angular.module('AngularCafe', [
     })
 
     .run(function run(titleService) {
-        titleService.setSuffix(' | AngularCafe');
+        titleService.setSuffix(' | AngularCafe Project Template');
     })
 
     .controller('AppCtrl', function ($scope) {

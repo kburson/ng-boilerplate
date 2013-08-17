@@ -11,7 +11,10 @@ describe "AngularCafe.home (midway)", ->
     hasModule = (m) ->
         deps.indexOf(m) >= 0
 
-    beforeEach ->
+    before ->
+        console.log("\nExecuting Test: home.spec.coffee");
+
+    before ->
         tester = new ngMidwayTester()
         tester.register "AngularCafe.home"
         module = angular.module("AngularCafe.home")
