@@ -5,35 +5,25 @@ assert = chai.assert
 
 describe "AngularCafe.home (midway)", ->
 
+    moduleName = "AngularCafe.home"
+
     module = undefined
-    deps = undefined
     tester = undefined
-    hasModule = (m) ->
-        deps.indexOf(m) >= 0
 
     before ->
-        console.log("\nExecuting Test: home.spec.coffee");
+        console.log("\nExecuting Test: home.spec.coffee")
 
-    before ->
-        tester = new ngMidwayTester()
-        tester.register "AngularCafe.home"
-        module = angular.module("AngularCafe.home")
-        deps = module.value("AngularCafe.home").requires
+    beforeEach ->
+        tester = ngMidwayTester(moduleName)
+        tester.attach
+
+        module = angular.module(moduleName)
+
+    afterEach ->
+        tester.destroy()
+        tester = null
+
 
     it "should be registered", ->
         expect(module).is.not.null
 
-    it "should have templates-app dependency", ->
-        expect(hasModule("templates-app")).is.true
-
-    it "should have templates-common dependency", ->
-        expect(hasModule("templates-common")).is.true
-
-    it "should have ui.state dependency", ->
-        expect(hasModule("ui.state")).is.true
-
-    it "should have titleService dependency", ->
-        expect(hasModule("titleService")).is.true
-
-    it "should be true", ->
-        true.should.be.ok

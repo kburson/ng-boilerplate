@@ -499,7 +499,7 @@ module.exports = function (grunt) {
                 files: {
                     src: [
                         '<%= files.test.unit.js %>',
-                        //'<%= files.test.midway.js %>',
+                        '<%= files.test.midway.js %>',
                         '<%= files.test.e2e.js %>'
                     ]
                 }
@@ -573,7 +573,7 @@ module.exports = function (grunt) {
                 expand: true,
                 files: [
                     {src: ['<%= files.test.unit.coffee %>']},
-                    //{src: ['<%= files.test.midway.coffee %>']},
+                    {src: ['<%= files.test.midway.coffee %>']},
                     {src: ['<%= files.test.e2e.coffee %>']}
                 ]
             }
@@ -722,15 +722,15 @@ module.exports = function (grunt) {
                     '<%= files.test.unit.coffee %>'
                 ]
             },
-//            midway: {
-//                port: 9020,
-//                files: [
-//                    {pattern: 'vendor/ngMidwayTester/Source/ngMidwayTester.js', watched: false},
-//                    {pattern: 'node_modules/sinon/pkg/sinon.js', watched: false},
-//                    '<%= files.test.midway.js %>',
-//                    '<%= files.test.midway.coffee %>'
-//                ]
-//            },
+            midway: {
+                port: 9020,
+                files: [
+                    {pattern: 'vendor/ngMidwayTester/src/ngMidwayTester.js', watched: false},
+                    {pattern: 'node_modules/sinon/pkg/sinon.js', watched: false},
+                    '<%= files.test.midway.js %>',
+                    '<%= files.test.midway.coffee %>'
+                ]
+            },
             e2e: {
                 port: 9030, // server listening on port
                 files: [
@@ -830,18 +830,18 @@ module.exports = function (grunt) {
                 background: false
             },
 
-//            midway: {
-//                browsers: ['Chrome'],
-//                port: '<%= tests.midway.port %>',// server listening on port
-//                files: '<%= tests.midway.files %>'
-//            },
-//
-//            ci_midway: {
-//                port: '<%= tests.midway.port %>',// server listening on port
-//                files: '<%= tests.midway.files %>',
-//                singleRun: true,
-//                background: false
-//            },
+            midway: {
+                browsers: ['Chrome'],
+                port: '<%= tests.midway.port %>',// server listening on port
+                files: '<%= tests.midway.files %>'
+            },
+
+            ci_midway: {
+                port: '<%= tests.midway.port %>',// server listening on port
+                files: '<%= tests.midway.files %>',
+                singleRun: true,
+                background: false
+            },
 
             e2e: {
                 frameworks: ['ng-scenario','mocha', 'chai', 'chai-as-promised', 'sinon-chai'],
@@ -886,12 +886,12 @@ module.exports = function (grunt) {
                 patterns: '<%= karma.unit.files %>'
             },
 
-//            midway: {
-//                template: '<%= folders.config %>/karma.config.tpl.coffee',
-//                dest: '<%= folders.build %>/karma.midway.conf.coffee',
-//                patterns: '<%= karma.midway.files %>'
-//
-//            },
+            midway: {
+                template: '<%= folders.config %>/karma.config.tpl.coffee',
+                dest: '<%= folders.build %>/karma.midway.conf.coffee',
+                patterns: '<%= karma.midway.files %>'
+
+            },
 
             e2e: {
                 template: '<%= folders.config %>/karma.config.tpl.coffee',
@@ -1025,11 +1025,11 @@ module.exports = function (grunt) {
                 options: { livereload: false }
             },
 
-//            jsmidway: {
-//                files: [ '<%= files.test.midway.js %>' ],
-//                tasks: [ 'jshint:test', 'karma:midway:run' ],
-//                options: { livereload: false }
-//            },
+            jsmidway: {
+                files: [ '<%= files.test.midway.js %>' ],
+                tasks: [ 'jshint:test', 'karma:midway:run' ],
+                options: { livereload: false }
+            },
 
             jse2e: {
                 files: [ '<%= files.test.e2e.js %>' ],
@@ -1047,11 +1047,11 @@ module.exports = function (grunt) {
                 options: { livereload: false }
             },
 
-//            coffeemidway: {
-//                files: [ '<%= files.test.midway.coffee %>' ],
-//                tasks: [ 'coffeelint:test', 'karma:midway:run' ],
-//                options: { livereload: false }
-//            },
+            coffeemidway: {
+                files: [ '<%= files.test.midway.coffee %>' ],
+                tasks: [ 'coffeelint:test', 'karma:midway:run' ],
+                options: { livereload: false }
+            },
 
             coffeee2e: {
                 files: [ '<%= files.test.e2e.coffee %>' ],
@@ -1063,8 +1063,8 @@ module.exports = function (grunt) {
         concurrent: {
             tests: [
                 'karma:ci_unit',
-                //'karma:ci_midway'//,
-                //'karma:ci_e2e'
+                'karma:ci_midway',
+                'karma:ci_e2e'
             ]
         }
     };
@@ -1086,22 +1086,22 @@ module.exports = function (grunt) {
     grunt.registerTask('e2e_mocha', ['express:e2e','simplemocha']);
     grunt.registerTask('e2e_karma', ['express:e2e','karma:ci_e2e']);
 
-    grunt.registerTask('dev', [ 'reset','build','karma:unit','watch']);// ,'karma:midway','watch']);
+    grunt.registerTask('dev', [ 'reset','build','karma:unit','karma:midway','watch']);
 
 
     /**
      * The default task is to build and compile.
      */
-    grunt.registerTask('default', ['init', 'build', 'karma:ci_unit', 'compile']); //, 'karma:ci_midway', 'compile']);
+    grunt.registerTask('default', ['init', 'build', 'karma:ci_unit', 'karma:ci_midway', 'compile']);
 
-    grunt.registerTask('test', [ 'reset', 'karma:ci_unit']); //, 'karma:ci_midway' ]);
+    grunt.registerTask('test', [ 'reset', 'karma:ci_unit', 'karma:ci_midway' ]);
 
     grunt.registerTask('run_tests', function() {
 
         grunt.task.run('karma:unit:run');
        //console.log(this.errorCount,' failed tests');
 
-        //grunt.task.run('karma:midway:run');
+        grunt.task.run('karma:midway:run');
         //grunt.task.run('karma:e2e:run');
 
         //console.log(this.errorCount,' failed tests');

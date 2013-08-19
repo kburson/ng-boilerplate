@@ -14,7 +14,7 @@
     "devDependencies": {
         "angular-mocks": "1.2.0rc1",
         "angular-scenario": "1.2.0rc1",
-        "ngMidwayTester": "yearofmoo/ngMidwayTester"
+        "ngMidwayTester": "https://github.com/kburson/ngMidwayTester.git"
     },
     "exportsOverride": {
         "angular-ui-router": {
@@ -60,6 +60,8 @@
         "angular-resource": "1.2.0rc1",
         "angular-mocks": "1.2.0rc1",
         "angular-scenario": "1.2.0rc1",
+
+        "ngMidwayTester": "yearofmoo/ngMidwayTester",
 
         "angular": "http://code.angularjs.org/1.1.5/angular.js",
         "angular-resource": "http://code.angularjs.org/1.1.5/angular-resource.js",
