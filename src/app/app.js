@@ -10,7 +10,7 @@ angular.module('AngularCafe', [
         'ui.route'
     ])
 
-    .config(function myAppConfig($stateProvider, $urlRouterProvider) {
+    .config(function ($stateProvider, $urlRouterProvider) {
         $urlRouterProvider.otherwise('/home');
     })
 
@@ -22,7 +22,7 @@ angular.module('AngularCafe', [
         $scope.features = [
             'Angular',
             'Grunt',
-            'SASS',
+            'LESS',
             'TDD, because it is the only way.',
             'Full Bower Integration'
         ];

@@ -7,7 +7,7 @@ src/
   |- app/
   |  |- home/
   |  |- app.js
-  |  |- app.spec.js
+  |  |- app.unit.spec.coffee
 ```
 
 The `src/app` directory contains all code specific to this application. Apart
@@ -42,10 +42,12 @@ app-wide dependencies that are required to assemble your app.
 
 ```js
 angular.module( 'AngularCafe', [
-  'app-templates',
-  'component-templates',
-  'AngularCafe.home',
-  'AngularCafe.about'
+        'templates-app',
+        'templates-common',
+        'AngularCafe.home',
+        'AngularCafe.about',
+        'ui.state',
+        'ui.route'
 ])
 ```
 
@@ -60,6 +62,9 @@ is where we want to start, which has a defined route for `/home` in
 .config( function AngularCafeConfig ( $routeProvider ) {
   $routeProvider.otherwise({ redirectTo: '/home' });
 })
+.config(function ($stateProvider, $urlRouterProvider) {
+    $urlRouterProvider.otherwise('/home');
+  })
 ```
 
 One of the components included by default is a basic `titleService` that simply
@@ -68,9 +73,9 @@ an optional suffix to be appended to the end of any title set later on, so we se
 this now to ensure it runs before our controllers set titles.
 
 ```js
-.run([ 'titleService', function run ( titleService ) {
-  titleService.setSuffix( ' | AngularCafe' );
-}])
+.run(function run(titleService) {
+    titleService.setSuffix(' | AngularCafe Project Template');
+})
 ```
 
 And then we define our main application controller. It need not have any logic, 
@@ -78,8 +83,15 @@ but this is a good place for logic not specific to the template or route, such a
 menu logic or page title wiring.
 
 ```js
-.controller( 'AppCtrl', [ '$scope', function AppCtrl ( $scope ) {
-}])
+.controller('AppCtrl', function ($scope) {
+    $scope.features = [
+        'Angular',
+        'Grunt',
+        'LESS',
+        'TDD, because it is the only way.',
+        'Full Bower Integration'
+    ];
+});
 ```
 
 ### Testing
@@ -87,6 +99,6 @@ menu logic or page title wiring.
 One of the design philosophies of `AngularCafe` is that tests should exist
 alongside the code they test and that the build system should be smart enough to
 know the difference and react accordingly. As such, the unit test for `app.js`
-is `app.spec.js`, though it is quite minimal.
+is `app.unit.spec.coffee`, though it is quite minimal.
 
 That being said, for application general test

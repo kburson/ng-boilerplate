@@ -24,7 +24,7 @@ module.exports = {
         vendor: 'vendor',
         src: 'src',
         assets: '<%= folders.src %>/assets',
-        styles: '<%= folders.src %>/less',
+        styles: '<%= folders.src %>/styles',
         test: {
             all: '<%= folders.src %>/test',
             unit: '<%= folders.test.all %>/unit',

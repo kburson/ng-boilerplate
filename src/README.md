@@ -5,7 +5,7 @@
 The `src/` directory contains all code used in the application along with all
 tests of such code.
 
-```
+```sh
 src/
   |- app/
   |  |- about/
@@ -14,13 +14,14 @@ src/
   |  |- app.spec.js
   |- assets/
   |- common/
+  |  |- plusOneDirective/
   |  |- titleService/
-  |- scss/
-  |  |- main.scss
-  |  |- modules/
-  |  |- partials/
+  |- less/
+  |  |- main.less
   |  |- fonts/
+  |- test/
   |- index.html
+  |- README.md
 ```
 
 - `src/app/` - application-specific code, i.e. code not likely to be reused in
@@ -29,7 +30,7 @@ src/
   [Read more &raquo;](assets/README.md)
 - `src/common/` - third-party libraries or components likely to be reused in
   another application. [Read more &raquo;](components/README.md)
-- `src/scss/` - SASS/SCSS files. [Read more &raquo;](scss/README.md)
+- `src/styles/` - application specific LESS/CSS files. [Read more &raquo;](styles/README.md)
 - `src/index.html` - this is the HTML document of the single-page application.
   See below.
 
