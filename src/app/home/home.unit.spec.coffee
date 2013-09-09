@@ -1,8 +1,8 @@
 "use strict"
 
-expect = chai.expect
-should = chai.should()
-assert = chai.assert
+#expect = chai.expect
+#should = chai.should()
+#assert = chai.assert
 
 ###
 Tests sit right alongside the file they are testing, which is more intuitive
@@ -13,7 +13,9 @@ automatically.
 describe "AngularCafe.home", ->
     HomeCtrl = undefined
     scope = undefined
+
     beforeEach module("AngularCafe.home")
+
     beforeEach inject(($rootScope, $controller) ->
         scope = $rootScope.$new()
         HomeCtrl = $controller("HomeCtrl",

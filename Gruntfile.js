@@ -83,8 +83,8 @@ module.exports = function (grunt) {
             /* this not working yet. Waiting for plugin to be updated */
             prune: {
                 options: {
-                    install:false,
-                    prune:true,
+                    install: false,
+                    prune: true,
                     targetDir: '<%= bowerrc.directory %>',
                     verbose: true
                 }
@@ -95,11 +95,11 @@ module.exports = function (grunt) {
             selenium: {
                 options: {
                     delay: 10000,
-                    before : function() {
+                    before: function () {
                         console.log(' ---------- Start Selenium Server ---------- ');
                         grunt.task.run('shell:start_selenium');
                     },
-                    after : function() {
+                    after: function () {
                         console.log(' ---------- Selenium Server Started ---------- ');
                     }
                 }
@@ -609,7 +609,14 @@ module.exports = function (grunt) {
             }
         },
 
-
+        // gzip assets 1-to-1 for production
+        compress: {
+            zip: {
+                files: {
+                    './<%= pkg.name %>.<%=pkg.version %>': '<%= folders.compile %>/**'
+                }
+            }
+        },
         // use gunt-usemin
 
         /**
@@ -790,7 +797,6 @@ module.exports = function (grunt) {
                     'karma-coverage',
                     'karma-chai-plugins',
                     'karma-spec-reporter',
-                    'karma-ng-scenario', // this is being replaced by protractor
                     'karma-chrome-launcher',
                     'karma-firefox-launcher',
                     'karma-safari-launcher',
@@ -817,6 +823,19 @@ module.exports = function (grunt) {
                 files: '<%= tests.common.files %>'
             },
 
+            debug_unit: {
+                background: false,
+                browsers: ['Chrome'],
+                files: '<%= tests.unit.files %>',
+                port: '<%= tests.unit.port %>'// server listening on port
+            },
+            debug_midway: {
+                background: false,
+                browsers: ['Chrome'],
+                port: '<%= tests.midway.port %>',// server listening on port
+                files: '<%= tests.midway.files %>'
+            },
+
             unit: {
                 //browsers: ['Chrome'],
                 files: '<%= tests.unit.files %>',
@@ -831,7 +850,6 @@ module.exports = function (grunt) {
             },
 
             midway: {
-                browsers: ['Chrome'],
                 port: '<%= tests.midway.port %>',// server listening on port
                 files: '<%= tests.midway.files %>'
             },
@@ -842,30 +860,6 @@ module.exports = function (grunt) {
                 singleRun: true,
                 background: false
             },
-
-            e2e: {
-                frameworks: ['ng-scenario','mocha', 'chai', 'chai-as-promised', 'sinon-chai'],
-
-                browsers:['Chrome'],
-                port: '<%= tests.e2e.port %>',// server listening on port
-                files: '<%= tests.e2e.files %>'
-            },
-
-            ci_e2e: {
-                frameworks: ['ng-scenario','mocha', 'chai', 'chai-as-promised', 'sinon-chai'],
-
-                browsers:['Chrome'],
-                port: '<%= tests.e2e.port %>',// server listening on port
-                files: '<%= tests.e2e.files %>',
-                singleRun: true,
-                background: false
-
-            },
-            mocha: {
-                browsers:['Chrome'],
-                port: '<%= tests.e2e.port %>',// server listening on port
-                files: '<%= tests.e2e.files %>' //,'!<%= folders.test.e2e %>/*.mocha.*']
-            }
 
         },
 
@@ -1083,10 +1077,12 @@ module.exports = function (grunt) {
      *
      ******************************************************************************/
 
-    grunt.registerTask('e2e_mocha', ['express:e2e','simplemocha']);
-    grunt.registerTask('e2e_karma', ['express:e2e','karma:ci_e2e']);
+    grunt.registerTask('e2e_mocha', ['express:e2e', 'simplemocha']);
 
-    grunt.registerTask('dev', [ 'reset','build','karma:unit','karma:midway','watch']);
+    grunt.registerTask('debug:unit', [ 'reset', 'karma:debug_unit', 'karma:debug_unit:run' ]);
+    grunt.registerTask('debug:midway', [ 'reset', 'karma:debug_midway', 'karma:debug_midway:run' ]);
+
+    grunt.registerTask('dev', [ 'reset', 'build', 'karma:unit', 'karma:midway', 'watch']);
 
 
     /**
@@ -1096,10 +1092,10 @@ module.exports = function (grunt) {
 
     grunt.registerTask('test', [ 'reset', 'karma:ci_unit', 'karma:ci_midway' ]);
 
-    grunt.registerTask('run_tests', function() {
+    grunt.registerTask('run_tests', function () {
 
         grunt.task.run('karma:unit:run');
-       //console.log(this.errorCount,' failed tests');
+        //console.log(this.errorCount,' failed tests');
 
         grunt.task.run('karma:midway:run');
         //grunt.task.run('karma:e2e:run');
@@ -1118,7 +1114,7 @@ module.exports = function (grunt) {
     grunt.registerTask('reset', [ 'shell:kill_phantom' ]);
 
 
-    grunt.registerTask('killport', function() {
+    grunt.registerTask('killport', function () {
         console.log('args: ', this);
         //grunt.task.run( 'shell:kill_port' );
     });
@@ -1150,7 +1146,7 @@ module.exports = function (grunt) {
     grunt.registerTask('compile', [
         'recess:compile', 'copy:compile_assets', 'ngmin',
         'concat:compile_js', 'concat:vendor_js_min',
-        'uglify:compile', 'index:compile'
+        'uglify:compile', 'index:compile', 'compress'
     ]);
 
     grunt.registerTask('release', ['changelog']);

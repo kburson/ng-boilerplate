@@ -1,7 +1,7 @@
 
-should = chai.should()
-expect = chai.expect
-assert = chai.assert
+#should = chai.should()
+#expect = chai.expect
+#assert = chai.assert
 
 describe "AngularCafe", ->
 

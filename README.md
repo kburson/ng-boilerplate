@@ -279,3 +279,6 @@ replace **target** with one or more of the following:
 
 ## TODO:
    get code coverage with istanbul working
+
+## How to change repo origin
+git remote add origin https://github.com/....
