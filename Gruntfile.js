@@ -68,11 +68,12 @@ module.exports = function (grunt) {
                 //just run 'grunt bower:install' and you'll see files from your Bower packages in lib directory
                 options: {
                     install: true,
-                    cleanTargetDir: true,
-                    cleanBowerDir: true,
+                    //cleanTargetDir: true,
+                    //cleanBowerDir: true,
                     layout: 'byComponent',
                     targetDir: '<%= bowerrc.directory %>',
-                    verbose: true
+                    verbose: true,
+                    copy: false
                 }
             },
             prune: {
@@ -259,52 +260,6 @@ module.exports = function (grunt) {
             }
         },
 
-        /**
-         * `grunt concat` concatenates multiple source files into a single file.
-         */
-        concat: {
-            options: {
-                banner: '<%= meta.banner %>'
-            },
-            /**
-             * The `folders.compile` target is the concatenation of our application source code
-             * into a single file. All files matching what's in the `src.js`
-             * configuration property above will be included in the final build.
-             *
-             * In addition, the source is surrounded in the blocks specified in the
-             * `module.prefix` and `module.suffix` files, which are just run blocks
-             * to ensure nothing pollutes the global namespace.
-             *
-             * The `options` array allows us to specify some customization for this
-             * operation. In this case, we are adding a banner to the top of the file,
-             * based on the above definition of `meta.banner`. This is simply a
-             * comment with copyright information.
-             */
-            dist_js: {
-                src: [
-                    '<%= folders.config %>/module.prefix',
-                    '<%= folders.build %>/src/app/app.js',
-                    '<%= folders.build %>/src/*/**/*.js',
-                    '<%= html2js.app.dest %>',
-                    '<%= html2js.common.dest %>',
-                    '<%= folders.config %>/module.suffix'
-                ],
-                dest: '<%= folders.distribution %>/assets/<%= pkg.name %>.min.js'
-            },
-
-            vendor_js: {
-                src: [ '<%= files.vendor.js %>'],
-                dest: '<%= folders.distribution %>/assets/vendors.min.js'
-            },
-            vendor_js_min: {
-                src: [ '<%= files.vendor_min.js %>'],
-                dest: '<%= concat.vendor_js.dest %>'
-            },
-            vendor_css: {
-                src: [ '<%= files.vendor.css %>'],
-                dest: ['<%= folders.build %>/assets/vendor.css']
-            }
-        },
 
         /**
          * `grunt coffee` compiles the CoffeeScript sources. To work well with the
@@ -321,7 +276,7 @@ module.exports = function (grunt) {
                 },
                 expand: true,
                 cwd: '.',
-                src: [ '<%= files.app %>' ],
+                src: [ '<%= files.app %>', '<%= files.main %>'],
                 dest: '<%= folders.build %>',
                 ext: '.js'
             }
@@ -357,6 +312,54 @@ module.exports = function (grunt) {
         },
 
         /**
+         * `grunt concat` concatenates multiple source files into a single file.
+         */
+        concat: {
+            /**
+             * The `folders.compile` target is the concatenation of our application source code
+             * into a single file. All files matching what's in the `src.js`
+             * configuration property above will be included in the final build.
+             *
+             * In addition, the source is surrounded in the blocks specified in the
+             * `module.prefix` and `module.suffix` files, which are just run blocks
+             * to ensure nothing pollutes the global namespace.
+             *
+             * The `options` array allows us to specify some customization for this
+             * operation. In this case, we are adding a banner to the top of the file,
+             * based on the above definition of `meta.banner`. This is simply a
+             * comment with copyright information.
+             */
+            compiled_app_js: {
+                options: {
+                    banner: '<%= meta.banner %>'
+                },
+                src: [
+                    '<%= folders.config %>/module.prefix',
+                    '<%= folders.build %>/src/app/app.js',
+                    '<%= folders.build %>/src/*/**/*.js',
+                    '<%= html2js.app.dest %>',
+                    '<%= html2js.common.dest %>',
+                    '<%= folders.config %>/module.suffix'
+                ],
+                dest: '<%= folders.distribution %>/assets/<%= pkg.name %>.min.js'
+            },
+
+            vendor_min_js: {
+                src: [ '<%= files.vendor.min_js %>'],
+                dest: '<%= folders.distribution %>/assets/vendors.min.js'
+            },
+
+            vendor_js: {
+                src: [ '<%= files.vendor.js %>'],
+                dest: '<%= folders.distribution %>/assets/vendors.min.js'
+            },
+            vendor_css: {
+                src: [ '<%= files.vendor.css %>'],
+                dest: ['<%= folders.build %>/assets/vendor.css']
+            }
+        },
+
+        /**
          * `ng-min` annotates the sources before minifying.
          * That is, it allows us to code without the angular injection array syntax.
          */
@@ -364,14 +367,39 @@ module.exports = function (grunt) {
             dist: {
                 files: [
                     {
-                        src: [ '**/*.js' ],
-                        cwd: '<%= folders.build %>',
-                        dest: '<%= folders.build %>',
+                        src: [ 'assets/*.js' ],
+                        cwd: '<%= folders.distribution %>',
+                        dest: '<%= folders.distribution %>',
                         expand: true
                     }
                 ]
             }
         },
+
+        /**
+         * Minify the concatenated sources!
+         */
+        uglify: {
+            options: {
+                banner: '<%= meta.banner %>'
+                //,sourceMap: '<%= folders.distribution %>',
+            },
+            debug: {
+                options: {
+                    mangle: false
+                },
+                files: {
+                    '<%= concat.compiled_app_js.dest %>': ['<%= concat.compiled_app_js.dest %>']
+                }
+            },
+            dist: {
+                files: {
+                    //'<%= concat.vendor_js.dest %>': ['<%= concat.vendor_js.dest %>'],
+                    '<%= concat.compiled_app_js.dest %>': ['<%= concat.compiled_app_js.dest %>']
+                }
+            }
+        },
+
 
         ngdocs: {
             /**
@@ -404,7 +432,7 @@ module.exports = function (grunt) {
              * API section configuration. Defines source files and a section title.
              */
             api: {
-                src: ['<%= files.app %>', '<%= folders.docs %>/content/api/*.ngdoc'],
+                src: ['<%= files.main %>','<%= files.app %>', '<%= folders.docs %>/content/api/*.ngdoc'],
                 title: 'API Reference'
             },
 
@@ -424,28 +452,6 @@ module.exports = function (grunt) {
             }
         },
 
-        /**
-         * Minify the concatenated sources!
-         */
-        uglify: {
-            options: {
-                banner: '<%= meta.banner %>'
-                //,sourceMap: '<%= folders.distribution %>',
-            },
-            debug: {
-                options: {
-                    mangle: false
-                },
-                files: {
-                    '<%= concat.dist_js.dest %>': ['<%= concat.dist_js.dest %>']
-                }
-            },
-            dist: {
-                files: {
-                    '<%= concat.dist_js.dest %>': ['<%= concat.dist_js.dest %>']
-                }
-            }
-        },
 
         /**
          * `recess` handles our LESS compilation and uglification automatically.
@@ -551,7 +557,7 @@ module.exports = function (grunt) {
                     livereload: false,
                     port: 9500,
                     hostname: 'localhost', // '*',  change this to '0.0.0.0' to access the server from outside
-                    bases: [ userConfig.folders.compile, '.' ]
+                    bases: [ userConfig.folders.distribution, '.' ]
                 }
             }
         },
@@ -567,7 +573,7 @@ module.exports = function (grunt) {
                 nonull: true,
                 expand: true,
                 files: [
-                    {src: [ '<%= files.app %>']}
+                    {src: [ '<%= files.main %>','<%= files.app %>']}
                 ]
             },
             test: {
@@ -575,7 +581,6 @@ module.exports = function (grunt) {
                 expand: true,
                 files: [
                     {src: ['<%= files.test.unit %>']},
-                    {src: ['<%= files.test.midway %>']},
                     {src: ['<%= files.test.e2e %>']}
                 ]
             }
@@ -645,6 +650,7 @@ module.exports = function (grunt) {
                     '<%= files.vendor.js %>',
                     '<%= folders.build %>/src/app/app.js',
                     '<%= folders.build %>/src/app/*/**/*.js',
+                    '<%= folders.build %>/src/common/**/*.js',
                     '<%= html2js.common.dest %>', // not needed, already included with build/src/**/*.js
                     '<%= html2js.app.dest %>',    // ditto
                     '<%= files.vendor.css %>',      // any included library js files
@@ -661,21 +667,26 @@ module.exports = function (grunt) {
                 dest: '<%= folders.distribution %>',
                 src: [
                     '<%= concat.vendor_js.dest %>',
-                    '<%= concat.dist_js.dest %>',
+                    '<%= concat.compiled_app_js.dest %>',
                     '<%= recess.dist.dest %>'
                 ]
             }
         },
 
         open: {// open browser to hosted location
-            server: { url: 'http://localhost:<%=express.livereload.port%>' },
-            dist: { url: 'http://localhost:<%=express.dist.port%>' }
+            dev: {
+                path: 'http://localhost:<%=express.livereload.options.port%>',
+                app: 'Google Chrome'
+            },
+            dist:   {
+                path: 'http://localhost:<%=express.dist.options.port%>',
+                app:  'Google Chrome'
+            }
         },
 
         concurrent: {
             tests: [
                 'karma:ci_unit',
-                'karma:ci_midway',
                 'karma:ci_e2e'
             ]
         }
@@ -707,11 +718,11 @@ module.exports = function (grunt) {
      *
      ******************************************************************************/
 
-    grunt.registerTask('default', ['init', 'build', 'karma:ci_unit', 'karma:ci_midway', 'compile_dist']);
-    //grunt.registerTask('default', ['build', 'karma:ci_unit', 'karma:ci_midway', 'compile_dist']);
+    grunt.registerTask('default', ['init', 'build', 'karma:ci_unit', 'compile_dist']);
+    //grunt.registerTask('default', ['build', 'karma:ci_unit', 'compile_dist']);
 
-    //grunt.registerTask('dev', [ 'init','reset', 'build', 'karma:unit', 'karma:midway', 'watch']);
-    //grunt.registerTask('dev', [ 'reset', 'build', 'karma:unit', 'karma:midway', 'watch']);
+    //grunt.registerTask('dev', [ 'init','reset', 'build', 'karma:unit',  'watch']);
+    //grunt.registerTask('dev', [ 'reset', 'build', 'karma:unit',  'watch']);
     grunt.registerTask('dev', function () {
         grunt.renameTask('watch', 'watch_no_tests');
         grunt.task.run('reset', 'build', 'watch_no_tests');
@@ -719,29 +730,28 @@ module.exports = function (grunt) {
 
     grunt.registerTask('dev_with_tests', function () {
         grunt.renameTask('watch', 'watch_with_tests');
-        grunt.task.run('reset', 'build', 'karma:unit', 'karma:midway', 'watch_with_tests');
+        grunt.task.run('reset', 'build', 'karma:unit',  'watch_with_tests');
     });
 
     // This allows you to see your changes live in the hosted web app
-    grunt.registerTask('dev_server', [ 'express:livereload', 'express-keepalive', 'open:build']);
+    grunt.registerTask('dev_server', [ 'express:livereload', 'open:dev', 'express-keepalive']);
 
-    grunt.registerTask('dist_server', [ 'express:dist', 'express-keepalive', 'open:dist']);
+    grunt.registerTask('dist_server', [ 'express:dist', 'open:dist', 'express-keepalive']);
 
     // these tasks will start a test server and keep it running so you can capture the browser and debug.
     grunt.registerTask('debug_unit', [ 'reset', 'karma:debug_unit', 'karma:debug_unit:run' ]);
-    grunt.registerTask('debug_midway', [ 'reset', 'karma:debug_midway', 'karma:debug_midway:run' ]);
 
     // If you are running e2e tests you will need to start the selenium server first
     grunt.registerTask('e2e_server', [ 'shell:start_selenium']);
     grunt.registerTask('e2e_mocha', ['express:e2e', 'simplemocha']);
 
 
-    // quick run of unit and midway tests then quit.  This will kill any other karma/phantomjs processes running.
-    //grunt.registerTask('test_watch', [ 'karma:unit:run', 'karma:midway:run' ]);
-    grunt.registerTask('test', [ 'reset', 'karma:ci_unit', 'karma:ci_midway' ]);
+    // quick run of unit tests then quit.  This will kill any other karma/phantomjs processes running.
+    //grunt.registerTask('test_watch', [ 'karma:unit:run' ]);
+    grunt.registerTask('test', [ 'reset', 'karma:ci_unit' ]);
 
 
-    // If running unit/midway tests leave behind orhpaned phantomjs processes, this will find and kill them all
+    // If running unit tests leave behind orhpaned phantomjs processes, this will find and kill them all
     grunt.registerTask('reset', [ 'shell:kill_phantom' ]);
 
     //The `build` task gets your app ready to run for development and testing.
@@ -761,16 +771,20 @@ module.exports = function (grunt) {
      * The `compile_dist` task gets your app ready for deployment by concatenating and
      * minifying your code.
      */
-    grunt.registerTask('compile_dist:debug', [
-        'recess:dist', 'copy:dist_assets', 'ngmin',
-        'concat:dist_js', 'concat:vendor_js',
-        'uglify:debug', 'index:dist'
+    grunt.registerTask('package:debug', [
+        'recess:dist', 'copy:dist_assets',
+        'concat:compiled_app_js','ngmin',
+        'uglify:debug',
+        'concat:vendor_min_js',
+        'index:dist'
     ]);
 
-    grunt.registerTask('compile_dist', [
-        'recess:dist', 'copy:dist_assets', 'ngmin',
-        'concat:dist_js', 'concat:vendor_js_min',
-        'uglify:dist', 'index:dist'
+    grunt.registerTask('package', [
+        'recess:dist', 'copy:dist_assets',
+        'concat:compiled_app_js', 'ngmin',
+        'uglify:dist',
+        'concat:vendor_min_js',
+        'index:dist'
     ]);
 
 

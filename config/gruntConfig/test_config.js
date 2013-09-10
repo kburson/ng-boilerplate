@@ -38,7 +38,9 @@ module.exports = {
                 {pattern: '<%= files.vendor.js %>', watched: false},
                 {pattern: '<%= html2js.app.dest %>', watched: true},
                 {pattern: '<%= html2js.common.dest %>', watched: true},
-                {pattern: '<%= files.app %>', watched: true}
+                {pattern: '<%= files.main %>', watched: false},
+                {pattern: '<%= files.app %>', watched: false}
+                //{pattern: '<%= folders.build %>/src/**/*.js', watched: false}
             ]
         },
         unit: {
@@ -50,18 +52,6 @@ module.exports = {
             ],
             junitReporter: {
                 outputFile: 'unit-test-results.xml',
-                suite: ''
-            }
-        },
-        midway: {
-            port: 9020,
-            files: [
-                {pattern: 'vendor/ngMidwayTester/src/ngMidwayTester.js', watched: false},
-                {pattern: 'node_modules/sinon/pkg/sinon.js', watched: false},
-                '<%= files.test.midway %>'
-            ],
-            junitReporter: {
-                outputFile: 'midway-test-results.xml',
                 suite: ''
             }
         }
@@ -126,8 +116,9 @@ module.exports = {
                 'karma-phantomjs-launcher'
             ],
             preprocessors: {
-                '**/*.coffee': 'coffee',
-                'src/**/*.js': ['coverage']
+                '**/*.coffee': 'coffee'//,
+                //'<%=folders.build%>/src/**/*.js': ['coverage'],
+                //'<%=folders.build%>/*.js': ['coverage']
             },
             coffeePreprocessor: {
                 options: {
@@ -159,27 +150,6 @@ module.exports = {
             files: '<%= tests.unit.files %>',
             port: '<%= tests.unit.port %>',// server listening on port
             junitReporter: '<%= tests.unit.junitReporter %>',
-            singleRun: true,
-            background: false
-        },
-
-        debug_midway: {
-            background: false,
-            browsers: ['Chrome'],
-            port: '<%= tests.midway.port %>',// server listening on port
-            files: '<%= tests.midway.files %>'
-        },
-
-        midway: {
-            port: '<%= tests.midway.port %>',// server listening on port
-            files: '<%= tests.midway.files %>',
-            junitReporter: '<%= tests.midway.junitReporter %>'
-        },
-
-        ci_midway: {
-            port: '<%= tests.midway.port %>',// server listening on port
-            files: '<%= tests.midway.files %>',
-            junitReporter: '<%= tests.midway.junitReporter %>',
             singleRun: true,
             background: false
         }

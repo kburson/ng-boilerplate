@@ -1,19 +1,9 @@
 # ngMidwayTester requires $routeProvider // $route + $routeProvider are deprecated. Angular is moving towards angular-ui-router
-angular.module("AngularCafe",
-    [
-        "templates-app",
-        "templates-common",
-        "AngularCafe.home",
-        "AngularCafe.about",
-        "ngRoute",
-        "ui.state",
-        "ui.route"
-    ]
-)
+angular.module("AngularCafe",["ngRoute", "ui.router", "templates-app", "templates-common", "AngularCafe.home", "AngularCafe.about", "titleService", "plusOne"])
 .config(($stateProvider, $urlRouterProvider) ->
     $urlRouterProvider.otherwise "/home"
 )
-.run(run = (titleService) ->
+.run((titleService) ->
     titleService.setSuffix " | AngularCafe Project Template"
 )
 .controller "AppCtrl", ($scope) ->

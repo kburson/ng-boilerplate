@@ -1,4 +1,3 @@
-"use strict"
 
 ###
 Each section of the site has its own module. It probably also has
@@ -26,8 +25,8 @@ this way makes each module more "self-contained".
 ###
 And of course we define a controller for our route.
 ###
-angular.module("AngularCafe.home", ["templates-app", "templates-common", "ui.state", "titleService"])
-    .config(config = ($stateProvider) ->
+angular.module("AngularCafe.home", ["templates-app", "templates-common", "ui.router", "titleService"])
+    .config(($stateProvider) ->
         $stateProvider.state "home",
             url: "/home"
             views:

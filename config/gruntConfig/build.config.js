@@ -16,7 +16,7 @@ module.exports = {
      * put'em in their own directory `test`.
      */
     folders: {
-        build: '_build',
+        build: '_compiled',
         distribution: '_dist',
         config: 'config',
         customTasks: '<%= folders.config %>/gruntTasks',
@@ -28,7 +28,6 @@ module.exports = {
         styles: '<%= folders.src %>/styles',
         test: {
             all: '<%= folders.src %>/test',
-            unit: '<%= folders.test.all %>/unit',
             midway: '<%= folders.test.all %>/integration',
             e2e: '<%= folders.test.all %>/e2e'
         }
@@ -44,16 +43,18 @@ module.exports = {
      * well as `e2e` contains our app's unit tests.
      */
     files: {
+
+        main: '<%= folders.src %>/app/app.coffee',
         app: [
-                '<%= folders.src %>/app/app.coffee',
-                '<%= folders.src %>/*/**/*.coffee',
+                '<%= folders.src %>/**/*.coffee',
+                '!<%= folders.src %>/app/app.coffee',
                 '!<%= folders.src %>/**/*.spec.coffee',
                 '!<%= folders.src %>/**/*.scenario.coffee',
-                '!<%= folders.test.all %>/**/*.coffee'
+                '!<%= folders.test.midway %>/**/*.coffee',
+                '!<%= folders.test.e2e %>/**/*.coffee'
             ],
         test: {
             unit: ['<%= folders.src %>/**/*.unit.spec.coffee'],
-            midway: ['<%= folders.src %>/**/*.midway.spec.coffee', '<%= folders.test.midway %>/**/*.spec.coffee'],
             e2e: ['<%= folders.src %>/**/*.scenario.coffee', '<%= folders.test.e2e %>/**/*.scenario.coffee']
         },
 
@@ -81,98 +82,54 @@ module.exports = {
          * The `vendor_files.css` property holds any CSS files to be automatically
          * included in our app.
          */
-        vendor_min: {
-            js: [
-                '<%= folders.vendor %>/jquery/jquery.min.js', // jquery need to load first
-                '<%= folders.vendor %>/jquery-ui/ui/minified/jquery-ui.min.js', // jquery need to load first
-
-                //'<%= folders.vendor %>/es5-shim/es5-shim.min.js',
-
-                /* pick and choose the boostrap modules you need */
-                // '<%= folders.vendor %>/bootstrap-less/js/*.js',
-                '<%= folders.vendor %>/lodash/dist/lodash.min.js',
-
-                '<%= folders.vendor %>/angular/angular.min.js',
-                //'<%= folders.vendor %>/angular-route/angular-route.min.js',
-                '<%= folders.vendor %>/angular-resource/angular-resource.min.js',
-
-//                '<%= folders.vendor %>/angular-bootstrap/ui-bootstrap-tpls.min.js',
-
-                //'<%= folders.vendor %>/angular-ui-utils/modules/route/route.js',
-                '<%= folders.vendor %>/angular-ui-router/release/angular-ui-router.min.js',
-                //'<%= folders.vendor %>/angular-ui/build/angular-route.min.js',
-
-                '<%= folders.vendor %>/angular-ui-sortable/index.js',
-                //'<%= folders.vendor %>/json3/json3.min.js',
-
-                /* with angular-boostrap, do we need bootstrap-less ? */
-                //'<%= folders.vendor %>/angular-bootstrap/ui-bootstrap.min.js',
-                '<%= folders.vendor %>/angulartics/src/angulartics.js',
-                '<%= folders.vendor %>/angulartics/src/angulartics-ga.js',
-                '<%= folders.vendor %>/angulartics/src/angulartics-mixpanel.js'
-            ]
-        },
         vendor: {
             min_js: [
-                '<%= folders.vendor %>/jquery/jquery.min.js', // jquery need to load first
+                '<%= folders.vendor %>/jquery/jquery.min.js',                   // jquery need to load first
                 '<%= folders.vendor %>/jquery-ui/ui/minified/jquery-ui.min.js', // jquery need to load first
 
-                //'<%= folders.vendor %>/es5-shim/es5-shim.min.js',
-
-                /* pick and choose the boostrap modules you need */
-                // '<%= folders.vendor %>/bootstrap-less/js/*.js',
                 '<%= folders.vendor %>/lodash/dist/lodash.min.js',
 
                 '<%= folders.vendor %>/angular/angular.min.js',
-                //'<%= folders.vendor %>/angular-route/angular-route.min.js',
+                '<%= folders.vendor %>/angular-route/angular-route.min.js', // TODO: Do we need this
+
                 '<%= folders.vendor %>/angular-resource/angular-resource.min.js',
+                '<%= folders.vendor %>/angular-sanitize/angular-sanitize.min.js',
 
-                //                '<%= folders.vendor %>/angular-bootstrap/ui-bootstrap-tpls.min.js',
+                '<%= folders.vendor %>/angular-bootstrap/ui-bootstrap-tpls.min.js',
 
-                //'<%= folders.vendor %>/angular-ui-utils/modules/route/route.js',
                 '<%= folders.vendor %>/angular-ui-router/release/angular-ui-router.min.js',
-                //'<%= folders.vendor %>/angular-ui/build/angular-route.min.js',
 
-                '<%= folders.vendor %>/angular-ui-sortable/index.js',
-                //'<%= folders.vendor %>/json3/json3.min.js',
+                '<%= folders.vendor %>/angular-ui-sortable/index.js',                 // NO Minified version available
 
-                /* with angular-boostrap, do we need bootstrap-less ? */
-                //'<%= folders.vendor %>/angular-bootstrap/ui-bootstrap.min.js',
-                '<%= folders.vendor %>/angulartics/src/angulartics.js',
-                '<%= folders.vendor %>/angulartics/src/angulartics-ga.js',
-                '<%= folders.vendor %>/angulartics/src/angulartics-mixpanel.js'
+                '<%= folders.vendor %>/angulartics/src/angulartics.js',               // NO Minified version available
+                '<%= folders.vendor %>/angulartics/src/angulartics-ga.js',            // NO Minified version available
+                '<%= folders.vendor %>/angulartics/src/angulartics-mixpanel.js',      // NO Minified version available
+
+                '<%= folders.vendor %>/angular-placeholders/angular-placeholders.js'  // NO Minified version available
             ],
             js: [
-                '<%= folders.vendor %>/jquery/jquery.js', // jquery need to load first
+                '<%= folders.vendor %>/jquery/jquery.js',          // jquery need to load first
                 '<%= folders.vendor %>/jquery-ui/ui/jquery-ui.js', // jquery need to load first
 
-                // '<%= folders.vendor %>/es5-shim/es5-shim.js',
-
-                /* pick and choose the boostrap modules you need */
-//                '<%= folders.vendor %>/bootstrap-less/js/*.js',
                 '<%= folders.vendor %>/lodash/dist/lodash.js',
 
-
                 '<%= folders.vendor %>/angular/angular.js',
-                //'<%= folders.vendor %>/angular-route/angular-route.js',
+                '<%= folders.vendor %>/angular-route/angular-route.js', // TODO: Do we need this
+
                 '<%= folders.vendor %>/angular-resource/angular-resource.js',
                 '<%= folders.vendor %>/angular-sanitize/angular-sanitize.js',
 
-//                '<%= folders.vendor %>/angular-bootstrap/ui-bootstrap-tpls.js',
+                '<%= folders.vendor %>/angular-bootstrap/ui-bootstrap-tpls.js',
 
-                // '<%= folders.vendor %>/angular-ui-utils/modules/route/route.js',
                 '<%= folders.vendor %>/angular-ui-router/release/angular-ui-router.js',
-                //'<%= folders.vendor %>/angular-ui/build/angular-route.js',
 
                 '<%= folders.vendor %>/angular-ui-sortable/index.js',
-                //'<%= folders.vendor %>/json3/json3.js',
 
-                /* with angular-bootstrap, do we need bootstrap-less ? */
-                //'<%= folders.vendor %>/angular-bootstrap/ui-bootstrap.js'
                 '<%= folders.vendor %>/angulartics/src/angulartics.js',
                 '<%= folders.vendor %>/angulartics/src/angulartics-ga.js',
-                '<%= folders.vendor %>/angulartics/src/angulartics-mixpanel.js'
+                '<%= folders.vendor %>/angulartics/src/angulartics-mixpanel.js',
 
+                '<%= folders.vendor %>/angular-placeholders/angular-placeholders.js'
             ],
             css: [
                 // '<%= folders.vendor %>/**/*.css'

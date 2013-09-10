@@ -22,16 +22,6 @@ module.exports = {
         },
 
         /**
-         * When the Gruntfile changes, we just want to lint it. In fact, when
-         * your Gruntfile changes, it will automatically be reloaded!
-         */
-        gruntfile: {
-            files: [ 'Gruntfile.js' ],
-            tasks: ['jshint:gruntfile'],
-            options: { livereload: false }
-        },
-
-        /**
          * When the bower.json changes, we want to lint it and execute bower_install
          * to get any new dependencies
          */
@@ -42,10 +32,13 @@ module.exports = {
         },
 
         /**
-         * When the build.conf.js changes, we just want to lint it. In fact, when
+         * When the Gruntfile changes, we just want to lint it.
+         * In fact, when your Gruntfile changes, it will automatically be reloaded!
+         * When the build.conf.js changes, we just want to lint it.
+         * When the jshint rules change, relint everything
          */
         buildconf: {
-            files: [ '<%= folders.config %>/build.config.js' ],
+            files: [ '<%= folders.config %>/gruntConfig/*.js', 'Gruntfile.js', '<%= folders.config %>/jshint.json' ],
             tasks: ['jshint:buildconf'],
             options: { livereload: false }
         },
@@ -53,9 +46,10 @@ module.exports = {
         /**
          * When our CoffeeScript source files change, we want to run lint them and
          * run our unit tests.
+         * When the coffeelint rules change, relint everything
          */
         coffeesrc: {
-            files: ['<%= files.app %>'],
+            files: ['<%= files.app %>', '<%= folders.config %>/coffeelint.json'],
             tasks: [ 'coffeelint:src',
                 'coffee:app',
                 //'test_watch',
@@ -109,14 +103,6 @@ module.exports = {
             files: [ '<%= files.test.unit %>' ],
             tasks: [ 'coffeelint:test'
                 //, 'karma:unit:run'
-            ],
-            options: { livereload: false }
-        },
-
-        coffeemidway: {
-            files: [ '<%= files.test.midway %>' ],
-            tasks: [ 'coffeelint:test'
-                //, 'karma:midway:run'
             ],
             options: { livereload: false }
         },

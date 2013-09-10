@@ -36,7 +36,7 @@ module.exports = function (grunt) {
      */
     grunt.registerMultiTask('index', 'Process index.html template', function () {
 
-        var dirRegEx = new RegExp('^(' + grunt.config('folders.build') + '|' + grunt.config('folders.compile') + ')\/', 'g');
+        var dirRegEx = new RegExp('^(' + grunt.config('folders.build') + '|' + grunt.config('folders.distribution') + ')\/', 'g');
 
         var cssFiles = filterForCSS(this.filesSrc).map(function (file) {
             return file.replace(dirRegEx, '');
@@ -48,6 +48,7 @@ module.exports = function (grunt) {
 
         grunt.file.copy(grunt.config('folders.src') + '/index.html', this.data.dest + '/index.html', {
             process: function (contents) {
+                //console.log("jsFiles:",jsFiles,"\ncssFiles",cssFiles);
                 return grunt.template.process(contents, {
                     data: {
                         scripts: jsFiles,

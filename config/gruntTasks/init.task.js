@@ -2,12 +2,18 @@
 module.exports = function (grunt) {
 
     grunt.registerTask('init', 'install bower components if not already installed', function () {
+
+        var taskList = [];
+
         if (!grunt.file.isDir(grunt.config('folders.vendor'))) {
-            grunt.task.run('bower');
+            taskList.push('bower:install');
         }
+
         if (!grunt.file.isDir('./selenium')) {
-            grunt.task.run('shell:install_selenium');
+            taskList.push('shell:install_selenium');
         }
-        //grunt.task.run('karmaconfig');
+
+        grunt.task.run(taskList);
+
     });
 }
