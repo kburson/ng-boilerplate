@@ -23,7 +23,10 @@ describe "AngularCafe.home", ->
         )
     )
     it "should have a HomeCtrl", ->
+        HomeCtrl.should.be.defined
         expect(HomeCtrl).is.defined
 
     it "should be true", ->
         true.should.be.ok
+        expect(true).to.be.ok
+        assert.isTrue(true,'error msg')
