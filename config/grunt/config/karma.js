@@ -1,14 +1,13 @@
 /**
  * The Karma options.
  *
- * The list of browsers to launch to test on. This includes only "Firefox" by
- * default, but other browser names include:
+ * The list of browsers to launch to test on.
+ * This includes only "Firefox" by default, but other browser names include:
  * Chrome, ChromeCanary, Firefox, Opera, Safari, PhantomJS
-
+ *
  * basePath From where to look for files, starting with the location of karma config file.
  *
  * port: On which port should the browser connect,
- * runnerPort: on which port is the test runner operating
  * rootUrl:  and what is the URL path for the browser to use.
  */
 
@@ -39,7 +38,6 @@ module.exports = { // karma
         frameworks: ['mocha', 'chai', 'chai-as-promised', 'sinon-chai'], // mocha, jasmine, ng-scenario
         nestedFileMerge: true,
 
-        // TODO: create karma-protractor plugin to make protractor library available to all e2e tests.
 
         plugins: [
             //'karma-jasmine',
@@ -57,11 +55,7 @@ module.exports = { // karma
             'karma-safari-launcher',
             'karma-phantomjs-launcher'
         ],
-        preprocessors: {
-            '**/*.coffee': 'coffee'//,
-            //'<%=folders.build%>/src/**/*.js': ['coverage'],
-            //'<%=folders.build%>/*.js': ['coverage']
-        },
+        preprocessors: {'src/**/*.coffee': ['coffee'] },
         coffeePreprocessor: {
             options: {
                 sourceMap: true,
@@ -69,27 +63,52 @@ module.exports = { // karma
             }
         },
         coverageReporter: {
-            type: 'html',
-            dir: '<%folders.build%>/coverage/'
-        },
-        files: '<%= tests.common.files %>'
+            type: 'text' // default to console
+            //type: 'html',
+            //dir: '<%folders.coverage%>',
+            //file: 'coverage.html'
+        }
+        //,files: '<%= tests.common.files %>'
     },
 
-    debug_unit: {
+    coverage: {
+        preprocessors: {
+            '<%= folders.coverage%>/src/**/*.js': ['coverage']
+        },
+        reporters: ['junit', 'spec', 'coverage' ], // 'dots','progress', 'junit', 'spec' ['list', 'tap' for mocha]
+        singleRun: true,
+        background: false,
+        files: [
+            {
+                src: ['<%= folders.coverage%>/src/**/*.js', '<%= tests.unit.files %>'],
+                //dest: '<%= folders.build %>/assets/',
+                //cwd: '<%= folders.assets %>',
+                expand: true
+            }
+        ],
+        port: '<%= tests.unit.port %>'// server listening on port
+    },
+
+    debug: {
         background: false,
         browsers: ['Chrome'],
-        files: '<%= tests.unit.files %>',
+        files: [{ src: ['<%= tests.common.files %>','<%= tests.unit.files %>'],expand: true}],
         port: '<%= tests.unit.port %>'// server listening on port
     },
 
     unit: {
-        files: '<%= tests.unit.files %>',
+        files: [{ src: ['<%= tests.common.files %>','<%= tests.unit.files %>'],expand: true}],
         port: '<%= tests.unit.port %>',// server listening on port
         junitReporter: '<%= tests.unit.junitReporter %>'
     },
 
-    ci_unit: {
-        files: '<%= tests.unit.files %>',
+    ci: {
+        files: [
+            {
+                src: ['<%= tests.common.files %>','<%= tests.unit.files %>'],
+                expand: true
+            }
+        ],
         port: '<%= tests.unit.port %>',// server listening on port
         junitReporter: '<%= tests.unit.junitReporter %>',
         singleRun: true,

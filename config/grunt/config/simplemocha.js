@@ -8,6 +8,9 @@
  if (options.slow) this.slow(options.slow);
  */
 module.exports = { // simplemocha
+
+     // TODO: create karma-protractor plugin to make protractor library available to all e2e tests.
+
     options: {
         //grep: '*-test',   // string or regexp to filter tests with
         ui: 'bdd',  // name "bdd", "tdd", "exports" etc

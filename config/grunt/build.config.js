@@ -16,6 +16,7 @@ module.exports = {
      * put'em in their own directory `test`.
      */
     folders: {
+        coverage: '_coverage',
         build: '_compiled',
         distribution: '_dist',
         config: 'config',
