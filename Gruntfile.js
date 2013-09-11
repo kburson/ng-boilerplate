@@ -718,8 +718,8 @@ module.exports = function (grunt) {
      *
      ******************************************************************************/
 
-    grunt.registerTask('default', ['init', 'build', 'karma:ci_unit', 'compile_dist']);
-    //grunt.registerTask('default', ['build', 'karma:ci_unit', 'compile_dist']);
+    grunt.registerTask('default', ['init', 'build', 'karma:ci_unit', 'package']);
+    //grunt.registerTask('default', ['build', 'karma:ci_unit', 'package']);
 
     //grunt.registerTask('dev', [ 'init','reset', 'build', 'karma:unit',  'watch']);
     //grunt.registerTask('dev', [ 'reset', 'build', 'karma:unit',  'watch']);
@@ -768,7 +768,7 @@ module.exports = function (grunt) {
     ]);
 
     /**
-     * The `compile_dist` task gets your app ready for deployment by concatenating and
+     * The `package` task gets your app ready for deployment by concatenating and
      * minifying your code.
      */
     grunt.registerTask('package:debug', [
