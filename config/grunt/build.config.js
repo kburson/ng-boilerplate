@@ -145,5 +145,30 @@ module.exports = {
                 '<%= folders.vendor %>/font-awesome/font/*.*'
             ]
         }
+    },
+
+    tests: {
+        common: {
+            files: [
+                {pattern: '<%= files.vendor.js %>', watched: false},
+                {pattern: '<%= html2js.app.dest %>', watched: true},
+                {pattern: '<%= html2js.common.dest %>', watched: true},
+                {pattern: '<%= files.main %>', watched: false},
+                {pattern: '<%= files.app %>', watched: false}
+                //{pattern: '<%= folders.build %>/src/**/*.js', watched: false}
+            ]
+        },
+        unit: {
+            port: 9010,
+            files: [
+                {pattern: 'vendor/angular-mocks/angular-mocks.js', watched: false},
+                {pattern: 'node_modules/sinon/pkg/sinon.js', watched: false},
+                '<%= files.test.unit %>'
+            ],
+            junitReporter: {
+                outputFile: 'unit-test-results.xml',
+                suite: ''
+            }
+        }
     }
 };

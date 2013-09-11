@@ -34,6 +34,7 @@
         "grunt-bump": ">=0.0.6",
         "grunt-cdn2": "~1.0",
         "grunt-coffeelint": "git+https://github.com/kburson/grunt-coffeelint.git",
+        "grunt-configure": ">=0.0.2",
         "grunt-concurrent": "~0.3",
         "grunt-conventional-changelog": "~0.1",
         "grunt-devtools": "~0.1",
